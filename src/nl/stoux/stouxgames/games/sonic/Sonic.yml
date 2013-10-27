@@ -1,0 +1,27 @@
+### StouxGames
+### Sonic Config
+
+# Locations
+spawn: empty
+racetrack: empty
+tutorial: empty
+
+# Buttons
+spawntorace: empty
+spawntotut: empty
+tuttorace: empty
+
+# Checkpoint regions
+start_end: empty
+checkpoint1: empty
+checkpoint2: empty
+checkpoint3: empty
+checkpoint4: empty
+checkpoint5: empty
+
+# Jump regions
+jump1: empty
+jump2: empty
+jump3: empty
+jump4: empty
+jump5: empty

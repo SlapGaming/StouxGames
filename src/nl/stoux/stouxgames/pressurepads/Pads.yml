@@ -1,0 +1,48 @@
+### StouxGames
+### Pads Config
+# Spleef
+spleefjoin:
+  x: 0
+  y: 0
+  z: 0
+spleefspectate:
+  x: 0
+  y: 0
+  z: 0
+# Sonic
+sonicjoin:
+  x: 0
+  y: 0
+  z: 0
+# Cake Defence
+cdjoin:
+  x: 0
+  y: 0
+  z: 0
+cdspectate:
+  x: 0
+  y: 0
+  z: 0
+# Parkour
+parkourjoin:
+  x: 0
+  y: 0
+  z: 0
+# TNT Run
+tntrunjoin:
+  x: 0
+  y: 0
+  z: 0
+tntrunspectate:
+  x: 0
+  y: 0
+  z: 0
+# Virus
+virusjoin:
+  x: 0
+  y: 0
+  z: 0
+virusspectate:
+  x: 0
+  y: 0
+  z: 0

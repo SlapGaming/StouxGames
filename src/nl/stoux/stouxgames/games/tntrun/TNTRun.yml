@@ -1,0 +1,16 @@
+### StouxGames
+### TNTRun Config
+
+# Floor Regions
+floor1: empty
+floor2: empty
+floor3: empty
+
+# Do the floors have TNT under it?
+tnt: true
+
+# Gameover Region
+gameover: empty
+
+# Lobby Teleport Location
+lobby: empty
