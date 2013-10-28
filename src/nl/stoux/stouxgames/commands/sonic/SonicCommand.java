@@ -1,5 +1,6 @@
 package nl.stoux.stouxgames.commands.sonic;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -95,7 +96,16 @@ public class SonicCommand extends AbstractCommand {
 				_.noPermission(sender);
 				return true;
 			}
-			sender.sendMessage("Nothing here yet..");
+			String[] helpMessages = new String[]{
+					ChatColor.YELLOW + "---" + ChatColor.AQUA + " Sonic Help " + ChatColor.YELLOW + "---",
+					ChatColor.YELLOW + "Credits: " + ChatColor.WHITE + "Map made by FVDisco" + ChatColor.YELLOW + " | " + ChatColor.WHITE + "Multiplayer by naithantu (& Stoux).",
+					ChatColor.YELLOW + "/sonic time <Player> " + ChatColor.WHITE + ": Get the player's highscore.",
+					ChatColor.YELLOW + "/sonic leaderboard <monthly> " + ChatColor.WHITE + ": Get the (Monthly) leaderboard.",
+					ChatColor.YELLOW + "/warpsonic " + ChatColor.WHITE + ": Warp to the start. " + ChatColor.GRAY + "(Only available in-game!)"
+			};
+			for (String msg : helpMessages) {
+				_.msg(sender, GameMode.Sonic, msg);
+			}
 		}
 		return true;
 	}

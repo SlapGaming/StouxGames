@@ -166,7 +166,7 @@ public class TNTRun extends AbstractGame {
 		String minutesString;
 		if (minutes == 1) minutesString = " minute"; 
 		else minutesString = " minutes";
-		_.broadcast(gm, "A new game of TNTRun will start in " + minutes + minutesString + "! Do " + ChatColor.AQUA + "/spawn games" + ChatColor.WHITE + " and join TNTRun!"); //Send the message
+		_.broadcast(gm, "A new game of TNT Run will start in " + minutes + minutesString + "! Do " + ChatColor.AQUA + "/spawn games" + ChatColor.WHITE + " and join TNT Run!"); //Send the message
 		_T.runLater_Sync(new Runnable() {
 			
 			@Override
@@ -189,7 +189,7 @@ public class TNTRun extends AbstractGame {
 	}
 	
 	private void startGame() {
-		_.broadcast(gm, "A new game of TNTRun is starting!");
+		_.broadcast(gm, "A new game of TNT Run is starting!");
 		state = GameState.starting;
 		
 		//Restore floors, just in case
@@ -199,13 +199,14 @@ public class TNTRun extends AbstractGame {
 			
 			private int seconds = 3;
 			private boolean hardcore = false;
+			private boolean speed = false;
 			private HashSet<Block> startBlocks;
 			
 			@Override
 			public void run() {
 				switch (seconds) {
 				case 3:
-					broadcastToPlayers("TNTRun is starting in 3 seconds!");
+					broadcastToPlayers("TNT Run is starting in 3 seconds!");
 					int nrBlocks = floor1Blocks.size();  //Get nr of blocks in floor
 					startBlocks = new HashSet<>(); //Make new hashset
 					for (GamePlayer gP : getPlayers()) {
@@ -218,27 +219,37 @@ public class TNTRun extends AbstractGame {
 					handleTab();
 					break;
 				case 2:
-					broadcastToPlayers("TNTRun is starting in 2 seconds!");
+					broadcastToPlayers("TNT Run is starting in 2 seconds!");
 					break;
 				case 1:
-					if (_.getRandomInt(20) == 8) { //5% chance for hardcore mode
+					int randomInt = _.getRandomInt(20);
+					switch (randomInt) {
+					case 8:
+						broadcastToPlayers("TNT Run is starting in 1 seconds! " + ChatColor.DARK_RED + "Hardcore mode activated...");
 						hardcore = true;
-						broadcastToPlayers("TNTRun is starting in 1 seconds! Hardcore mode activated...");
-					} else {
-						broadcastToPlayers("TNTRun is starting in 1 seconds!");
+						speed = true;
+						break;
+					case 1: case 9: case 15:
+						broadcastToPlayers("TNT Run is starting in 1 seconds! " + ChatColor.AQUA + "Speed modus activated!");
+						speed = true;
+						break;
+					default:
+						broadcastToPlayers("TNT Run is starting in 1 seconds!");
 					}
 					break;
 				case 0:
 					blockRemoverTask = new TNTRunBlockTask(tntRun, hasTNT);
 					blockRemover = _T.runTimer_Sync(blockRemoverTask, 0, 1); //start the task
-					broadcastToPlayers("TNTRun has started! Start running!!");
+					broadcastToPlayers("TNT Run has started! Start running!!");
 					for (Block b : startBlocks) {
 						blockRemoverTask.addBlock(b);
 					}
-					if (hardcore) { //If hardcore mode give everyone blindness
+					if (hardcore || speed) { //If hardcore mode give everyone blindness
 						for (GamePlayer gP : getPlayers()) {
 							if (gP.getState() == PlayerState.playing) {
-								_.giveInfinitePotion(gP.getPlayer(), PotionEffectType.BLINDNESS);
+								Player gPP = gP.getPlayer();
+								if (hardcore) _.giveInfinitePotion(gPP, PotionEffectType.BLINDNESS);
+								if (speed) _.giveInfinitePotion(gPP, PotionEffectType.SPEED, 2);
 							}
 						}
 					}
@@ -297,7 +308,7 @@ public class TNTRun extends AbstractGame {
 	 * @param gP The winning player
 	 */
 	private void playerWon(GamePlayer gP) {
-		_.broadcast(gm, gP.getName() + " has won TNTRun!");
+		_.broadcast(gm, gP.getName() + " has won TNT Run!");
 		gP.getPlayer().teleport(lobby);
 		gameEnded();
 	}
@@ -476,7 +487,7 @@ public class TNTRun extends AbstractGame {
 		}
 		
 		players.put(gP.getName(), gP);
-		broadcastToPlayers(gP.getName() + " has joined TNTRun!");
+		broadcastToPlayers(gP.getName() + " has joined TNT Run!");
 		
 		gP.setState(PlayerState.lobbyPlayer);
 		

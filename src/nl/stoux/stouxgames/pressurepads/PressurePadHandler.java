@@ -119,7 +119,6 @@ public class PressurePadHandler {
 		
 		//Get the block
 		Block b = _.getWorld().getBlockAt(new Location(_.getWorld(), x, y, z));
-		System.out.println("Pad: " + x + " | " + y + " | " + z + " | " + b.getType().toString());
 		
 		if (b.getType() == Material.STONE_PLATE || b.getType() == Material.WOOD_PLATE) { //Check if a pressure plate
 			pads.put(b.getLocation(), type); //Put the location in the map
