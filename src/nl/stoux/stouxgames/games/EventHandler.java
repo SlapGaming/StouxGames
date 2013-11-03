@@ -1,7 +1,9 @@
 package nl.stoux.stouxgames.games;
 
 import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -10,6 +12,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import nl.stoux.stouxgames.player.GamePlayer;
+import nl.stoux.stouxgames.util._;
 
 public class EventHandler {
 	
@@ -90,6 +93,25 @@ public class EventHandler {
 	 */
 	public void onItemPickup(GamePlayer gP, PlayerPickupItemEvent event) {
 		event.setCancelled(true);
+	}
+	
+	/**
+	 * A player has died
+	 * @param gP The player
+	 * @param event The event
+	 */
+	public void onPlayerDied(GamePlayer gP, PlayerDeathEvent event) {
+		gP.getGame().playerQuit(gP);
+		_.badMsg(gP.getPlayer(), "You died o.O?");
+	}
+	
+	/**
+	 * A player has taken damage
+	 * @param gP The player
+	 * @param event The event
+	 */
+	public void onPlayerDamage(GamePlayer gP, EntityDamageEvent event) {
+		return;
 	}
 
 }

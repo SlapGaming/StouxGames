@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.mcsg.double0negative.tabapi.TabAPI;
 
 import nl.stoux.stouxgames.player.GamePlayer;
+import nl.stoux.stouxgames.player.PlayerController;
 import nl.stoux.stouxgames.player.PlayerState;
 import nl.stoux.stouxgames.storage.YamlStorage;
 import nl.stoux.stouxgames.util._;
@@ -41,6 +42,13 @@ public abstract class AbstractGame {
 		automaticRun = false;
 		players = new HashMap<>();
 		enabled = false;
+	}
+	
+	/**
+	 * Reload this games config
+	 */
+	public void reloadConfig() {
+		yaml.reloadConfig();
 	}
 	
 	/**
@@ -86,7 +94,7 @@ public abstract class AbstractGame {
 	 * @param message the message
 	 */
 	public void broadcastToPlayers(String message) {
-		String msg = ChatColor.GOLD + "[" + gm + "] " + ChatColor.WHITE + message;
+		String msg = ChatColor.GREEN + "[" + gm + "] " + ChatColor.WHITE + message;
 		for (GamePlayer gP : players.values()) {
 			gP.getPlayer().sendMessage(msg);
 		}
@@ -130,6 +138,37 @@ public abstract class AbstractGame {
 	protected void spectateMessage(GamePlayer gP) {
 		_.msg(gP.getPlayer(), gm, "You have joined this game in spectating mode!");
 		_.msg(gP.getPlayer(), gm, "Leave the game (" + ChatColor.AQUA + "/leave" + ChatColor.WHITE +") and step on the 'play' pressure plate to join the game as player.");
+	}
+	
+	/**
+	 * Remove all the players
+	 */
+	protected void removeAllPlayers() {
+		PlayerController playerController = _.getPlayerController(); //Get the controller
+		for (GamePlayer gP : players.values()) { //Loop thru players
+			playerController.removePlayer(gP.getName());
+			gP.playerQuitGame();
+		}
+		players.clear();
+	}
+	
+	/**
+	 * Setup the game
+	 */
+	protected abstract void setupGame();
+	
+	/**
+	 * Disable the game
+	 */
+	public abstract void disableGame();
+	
+	/**
+	 * Reload the game
+	 */
+	public void reloadGame() {
+		disableGame();
+		yaml.reloadConfig();
+		setupGame();
 	}
 	
 	/**

@@ -4,6 +4,7 @@ import java.util.logging.Level;
 
 import nl.stoux.stouxgames.commands.CommandHandler;
 import nl.stoux.stouxgames.external.TabControl;
+import nl.stoux.stouxgames.games.AbstractGame;
 import nl.stoux.stouxgames.games.GameController;
 import nl.stoux.stouxgames.games.sonic.Sonic;
 import nl.stoux.stouxgames.games.spleef.Spleef;
@@ -97,6 +98,13 @@ public class StouxGames extends JavaPlugin {
 		
 		//Register events
 		pm.registerEvents(new EventListener(playerController), this);
+	}
+	
+	@Override
+	public void onDisable() {
+		for (AbstractGame game : _.getGameController().getGames()) {
+			game.disableGame();
+		}
 	}
 	
 	@Override

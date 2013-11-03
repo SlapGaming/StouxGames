@@ -1,5 +1,6 @@
 package nl.stoux.stouxgames.player;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 public class PlayerController {
@@ -45,6 +46,14 @@ public class PlayerController {
 	 */
 	public void removePlayer(String player) {
 		gamePlayers.remove(player);
+	}
+	
+	/**
+	 * Get all the registered players
+	 * @return The players
+	 */
+	public Collection<GamePlayer> getAllPlayers() {
+		return gamePlayers.values();
 	}
 	
 	

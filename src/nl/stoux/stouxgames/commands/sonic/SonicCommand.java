@@ -97,7 +97,7 @@ public class SonicCommand extends AbstractCommand {
 				return true;
 			}
 			String[] helpMessages = new String[]{
-					ChatColor.YELLOW + "---" + ChatColor.AQUA + " Sonic Help " + ChatColor.YELLOW + "---",
+					ChatColor.YELLOW + "---" + ChatColor.GREEN + " Sonic Help " + ChatColor.YELLOW + "---",
 					ChatColor.YELLOW + "Credits: " + ChatColor.WHITE + "Map made by FVDisco" + ChatColor.YELLOW + " | " + ChatColor.WHITE + "Multiplayer by naithantu (& Stoux).",
 					ChatColor.YELLOW + "/sonic time <Player> " + ChatColor.WHITE + ": Get the player's highscore.",
 					ChatColor.YELLOW + "/sonic leaderboard <monthly> " + ChatColor.WHITE + ": Get the (Monthly) leaderboard.",

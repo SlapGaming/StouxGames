@@ -1,5 +1,6 @@
 package nl.stoux.stouxgames.games;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 public class GameController {
@@ -24,6 +25,14 @@ public class GameController {
 	 */
 	public AbstractGame getGame(GameMode gamemode) {
 		return games.get(gamemode);
+	}
+	
+	/**
+	 * Get all the registered games
+	 * @return the games
+	 */
+	public Collection<AbstractGame> getGames() {
+		return games.values();
 	}
 	
 	

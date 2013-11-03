@@ -43,10 +43,7 @@ public class TNTRunBlockTask extends BukkitRunnable {
 			removeBlocks.remove(b); //Remove the block from the map
 			b.setType(Material.AIR); //Set the block to air
 			if (hasTNT) { //If TNT under block
-				Block underlyingBlock = b.getRelative(BlockFace.DOWN); //Get underlying block
-				if (underlyingBlock.getType() == Material.TNT) { //If block is TNT
-					underlyingBlock.setType(Material.AIR); //Set to air
-				}
+				b.getRelative(BlockFace.DOWN).setType(Material.AIR); //Set underlying block to Air
 			}
 		}
 		for (Entry<Player, Integer> entry : playerTicks.entrySet()) { //Loop thru players
@@ -91,10 +88,7 @@ public class TNTRunBlockTask extends BukkitRunnable {
 				if (isGameBlock(relativeBlock)) {
 					relativeBlock.setType(Material.AIR);
 					if (hasTNT) {
-						Block tntBlock = relativeBlock.getRelative(BlockFace.DOWN);
-						if (tntBlock.getType() == Material.TNT) {
-							tntBlock.setType(Material.AIR);
-						}
+						relativeBlock.getRelative(BlockFace.DOWN).setType(Material.AIR);
 					}
 					return;
 				}

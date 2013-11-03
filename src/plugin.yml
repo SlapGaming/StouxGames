@@ -1,5 +1,5 @@
 name: StouxGames
-version: 0.1.1
+version: 0.1.2
 description: Stoux Mini-Games plugin
 # Lots and lots of credit to Naithantu
 # Helping me out, teaching me stuff about bukkit
@@ -16,9 +16,13 @@ depend: [WorldGuard, WorldEdit]
 softdepend: [TabAPI, TagAPI, Essentials]
 
 commands:
+  stouxgames:
+    description: The main games command
+    aliases: [games]
+    usage: /stouxgames
   gleave:
-    description: Same as vipitem.
-    usage: /vip
+    description: Leave a game
+    usage: /gleave
   warpsonic:
      description: Warps you to the sonic world to race.
   sonic:

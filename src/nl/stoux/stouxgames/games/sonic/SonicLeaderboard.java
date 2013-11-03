@@ -108,12 +108,53 @@ public class SonicLeaderboard {
 		return "Checkpoint " + ChatColor.GRAY + String.valueOf(cp) + ChatColor.WHITE + " = " + ChatColor.GRAY + getTimeString(0, time) + ChatColor.WHITE;
 	}
 	
+	/**
+	 * Check SQL connection when a player joins.
+	 * @param sP The player
+	 */
+	public void playerJoins(final SonicPlayer sP) {
+		_T.run_ASync(new Runnable() {
+			
+			@Override
+			public void run() {
+				if (!checkConnection()) {
+					//Something is wrong, kick the player
+					_.badMsg(sP.getPlayer(), "Something is wrong with the game.. Sorry! Contact Stoux if he is online!");
+					sonic.playerQuit(sP);
+				}
+			}
+		});
+	}
+	
 	
 	/*
 	 *******************
 	 *  SQL Functions  *
 	 *******************
 	 */
+	/**
+	 * Check if the connection is still valid
+	 * If not try reconnecting
+	 * @return valid
+	 */
+	public boolean checkConnection() {
+		try {
+			if (con.isClosed()) {
+				_T.run_ASync(new Runnable() {
+					@Override
+					public void run() {
+						connectWithSQL();
+					}
+				});
+				return false;
+			}
+			return true;
+		} catch (SQLException e) {
+			return false;
+		}
+	}
+	
+	
 	/**
 	 * Let the leaderboard connect with the SQL server
 	 * Create the table if it doesn't exist yet.
@@ -195,6 +236,7 @@ public class SonicLeaderboard {
 						_.badMsg(player.getPlayer(), "Something went wrong with saving your sonic run. Contact Stoux!");
 					}
 					_.log(Level.SEVERE, "Failed to save SonicRun. Error: " + e.getMessage());
+					checkConnection();
 				}
 			}
 		});
@@ -360,6 +402,7 @@ public class SonicLeaderboard {
 				} catch (SQLException e) {
 					_.log(Level.SEVERE, GameMode.Sonic, "Failed to generate leaderboard! Monthly: " + monthly + ". SQLException: " + e.getMessage());
 					_.badMsg(p, "Something went wrong generating the leaderboard. Contact Stoux!");
+					checkConnection();
 				}
 				doingCommand.remove(playername);
 			}

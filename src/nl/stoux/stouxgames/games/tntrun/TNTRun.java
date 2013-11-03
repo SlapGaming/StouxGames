@@ -75,7 +75,7 @@ public class TNTRun extends AbstractGame {
 	/**
 	 * Initialize the game
 	 */
-	private void setupGame() {
+	protected void setupGame() {
 		enabled = false;
 		state = GameState.disabled;
 		
@@ -106,6 +106,19 @@ public class TNTRun extends AbstractGame {
 		enabled = true;
 		state = GameState.lobby;
 		_.log(Level.INFO, gm, "Up & running.");
+	}
+	
+	@Override
+	public void disableGame() {
+		state = GameState.disabled;
+		if (startCountdown instanceof BukkitTask) { //Cancel the task
+			startCountdown.cancel();
+		}
+		if (blockRemover instanceof BukkitTask) { //Cancel the task
+			blockRemover.cancel();
+		}
+		removeAllPlayers();
+		restoreFloors();		
 	}
 	
 	/**
@@ -167,6 +180,11 @@ public class TNTRun extends AbstractGame {
 		if (minutes == 1) minutesString = " minute"; 
 		else minutesString = " minutes";
 		_.broadcast(gm, "A new game of TNT Run will start in " + minutes + minutesString + "! Do " + ChatColor.AQUA + "/spawn games" + ChatColor.WHITE + " and join TNT Run!"); //Send the message
+		for (GamePlayer gP : players.values()) { //Send Spectate message to all spectators
+			if (gP.getState() == PlayerState.spectating || gP.getState() == PlayerState.lobbySpectator) {
+				spectateMessage(gP);
+			}
+		}
 		_T.runLater_Sync(new Runnable() {
 			
 			@Override
@@ -272,9 +290,36 @@ public class TNTRun extends AbstractGame {
 		}, 5, 20);		
 	}
 	
+	//Bukkit's restore task.
+	private BukkitTask restoreTask;
+	
 	private void gameEnded() {
 		state = GameState.finished;
-		restoreFloors();
+		restoreTask = _T.runTimer_Sync(new Runnable() {
+			private int x = 1;
+			@Override
+			public void run() {
+				//Restore floors
+				switch (x) {
+				case 1:
+					floor1.restore();
+					if (hasTNT) tntUnderBlocks(floor1Blocks);
+					break;
+				case 2:
+					floor2.restore();
+					if (hasTNT) tntUnderBlocks(floor2Blocks);
+					break;
+				case 3:
+					floor3.restore();
+					if (hasTNT) tntUnderBlocks(floor3Blocks);
+					break;
+				default: 
+					restoreTask.cancel();
+				}
+				x++;
+				
+			}
+		}, 1, 1);
 		int willingToPlay = 0; //Check howmany players are willing to play & set their state to correct one
 		for (GamePlayer player : players.values()) {
 			switch (player.getState()) {
@@ -505,7 +550,17 @@ public class TNTRun extends AbstractGame {
 
 	@Override
 	public GamePlayer playerJoinsSpectate(Player p) {
-		// TODO Auto-generated method stub
+		if (!enabled || state == GameState.enabled || state == GameState.disabled) {
+			_.badMsg(p, "This game is currently not activated.");
+			return null;
+		}
+		GamePlayer gP = new GamePlayer(p, this);
+		gP.resetPlayer();
+		_.getPlayerController().addPlayer(gP);
+		gP.setState(PlayerState.spectating);
+		gP.getPlayer().teleport(lobby);
+		spectateMessage(gP);
+		handleTab();
 		return null;
 	}
 	

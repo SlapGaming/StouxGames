@@ -95,7 +95,7 @@ public class _ {
 	 * @param message The message
 	 */
 	public static void broadcast(GameMode gm, String message) {
-		plugin.getServer().broadcastMessage(ChatColor.LIGHT_PURPLE + "[" + gm + "] " + ChatColor.WHITE + message);
+		plugin.getServer().broadcastMessage(ChatColor.GREEN + "[" + gm + "] " + ChatColor.WHITE + message);
 	}
 	
 	/*
@@ -167,7 +167,7 @@ public class _ {
 	 * @param message the message
 	 */
 	public static void msg(CommandSender sender, GameMode gm, String message) {
-		sender.sendMessage(ChatColor.LIGHT_PURPLE + "[" + gm + "] " + ChatColor.WHITE + message);
+		sender.sendMessage(ChatColor.GREEN + "[" + gm + "] " + ChatColor.WHITE + message);
 	}
 	
 	/**

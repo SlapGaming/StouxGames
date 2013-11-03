@@ -2,6 +2,7 @@ package nl.stoux.stouxgames.commands;
 
 
 import nl.stoux.stouxgames.commands.general.LeaveCommand;
+import nl.stoux.stouxgames.commands.main.StouxGamesCommand;
 import nl.stoux.stouxgames.commands.sonic.SonicCommand;
 import nl.stoux.stouxgames.commands.sonic.WarpsonicCommand;
 import nl.stoux.stouxgames.util._;
@@ -16,6 +17,11 @@ public class CommandHandler {
 		AbstractCommand commandObj = null; //The Abstract command
 		
 		switch (command) {
+		case "stouxgames": 
+		case "games":
+			commandObj = new StouxGamesCommand(sender, args);
+			break;
+		
 		//General
 		case "leave":
 		case "gleave": commandObj = new LeaveCommand(sender, args); 	break;

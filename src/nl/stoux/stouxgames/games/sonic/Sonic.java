@@ -61,7 +61,7 @@ public class Sonic extends AbstractGame {
 	/**
 	 * Initialize the game
 	 */
-	private void setupGame() {
+	protected void setupGame() {
 		enabled = false;
 		state = GameState.disabled;
 		
@@ -129,6 +129,11 @@ public class Sonic extends AbstractGame {
 		enabled = true;
 		state = GameState.playing;
 		_.log(Level.INFO, gm, "Up & Running.");
+	}
+	
+	@Override
+	public void disableGame() {
+		removeAllPlayers();
 	}
 	
 	/**
@@ -362,6 +367,7 @@ public class Sonic extends AbstractGame {
 					teleportToSonicLobby(sP);
 			}
 		}, 1);
+		leaderboard.checkConnection(); //Revive connection if needed
 		return sP;
 	}
 

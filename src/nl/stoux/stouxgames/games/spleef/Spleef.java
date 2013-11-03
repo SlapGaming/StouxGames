@@ -129,14 +129,16 @@ public class Spleef extends AbstractGame {
 		_.log(Level.INFO, gm, "Up & running.");
 	}
 	
-	/**
-	 * Reload the game
-	 */
-	public void reloadGame() {
-		yaml.reloadConfig();
-		setupGame();
+	@Override
+	public void disableGame() {
+		if (startingTask instanceof BukkitTask) {
+			startingTask.cancel(); //Cancel the task if running
+		}
+		state = GameState.disabled;
+		removeAllPlayers();
+		playground.restore();
 	}
-	
+		
 	/**
 	 * See if the spleef arena is enabled
 	 * @return is enabled
@@ -182,11 +184,7 @@ public class Spleef extends AbstractGame {
 		players.remove(gP.getName());
 		gP.playerQuitGame();
 		switch(state) {
-		case starting:
-			startingTask.cancel();
-			//DO NOT BREAK 
 		case playing: //Player gets removed from the game
-			players.remove(gP.getName());
 			broadcastToPlayers(gP.getName() + " has left the game!");
 			checkRemainingPlayers();
 			break;
@@ -249,7 +247,7 @@ public class Spleef extends AbstractGame {
 		_.broadcast(gm, "A new game of spleef will start in " + minutes + minutesString + "! Do " + ChatColor.AQUA + "/spawn games" + ChatColor.WHITE + " and join spleef!"); //Send the message
 		for (GamePlayer gP : players.values()) {
 			if (gP.getState() == PlayerState.lobbySpectator || gP.getState() == PlayerState.spectating) {
-				
+				spectateMessage(gP);
 			}
 		}
 		_T.runLater_Sync(new Runnable() {
@@ -266,6 +264,7 @@ public class Spleef extends AbstractGame {
 					startGame();
 				} else {
 					broadcastToPlayers("Not enough players to start the game.");
+					state = GameState.lobby;
 				}
 			}
 		}, minutes * 60 * 20);

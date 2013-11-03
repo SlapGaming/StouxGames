@@ -33,6 +33,14 @@ public enum GameMode {
 		return fullname;
 	}
 	
+	/**
+	 * Same as toString()
+	 * @return the fullname
+	 */
+	public String getName() {
+		return fullname;
+	}
+	
 	public String getTab() {
 		return tab;
 	}
