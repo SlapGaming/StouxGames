@@ -214,6 +214,11 @@ public class Sonic extends AbstractGame {
 		return race;
 	}
 	
+	@Override
+	public Location getLobby() {
+		return spawn;
+	}
+	
 	/*
 	 * Events
 	 */

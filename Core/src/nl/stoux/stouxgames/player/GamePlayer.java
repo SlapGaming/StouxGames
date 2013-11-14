@@ -46,6 +46,7 @@ public class GamePlayer {
 	 * Teleport to GamesWorld spawn location
 	 */
 	public void resetPlayer() {
+		if (p.isDead()) return;
 		//Wipe XP
 		p.setExp(0);
 		p.setLevel(0);
@@ -60,7 +61,7 @@ public class GamePlayer {
 		//Wipe the inventory
 		p.getInventory().clear();
 		p.getInventory().setArmorContents(new ItemStack[4]);
-		
+				
 		//Remove Vehicles
 		p.eject();
 		if (p.getPassenger() != null) {

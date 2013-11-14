@@ -478,6 +478,11 @@ public class TNTRun extends AbstractGame {
 		}
 	}
 	
+	@Override
+	public Location getLobby() {
+		return lobby;
+	}
+	
 	
 	
 	/*

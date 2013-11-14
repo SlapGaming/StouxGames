@@ -1,5 +1,8 @@
 package nl.stoux.stouxgames.listener;
 
+import nl.stoux.stouxgames.games.GameMode;
+import nl.stoux.stouxgames.games.GameState;
+import nl.stoux.stouxgames.games.cakedefence.CakeDefence;
 import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.player.PlayerController;
 import nl.stoux.stouxgames.util._;
@@ -9,7 +12,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -18,6 +25,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class EventListener implements Listener {
 
@@ -126,5 +134,48 @@ public class EventListener implements Listener {
 			gP.getGame().Events.onPlayerDamage(gP, event);
 		}
 	}
+	
+	@EventHandler
+	public void onEntityDies(EntityDeathEvent event) {
+		if (event.getEntity() instanceof Player) return; //Return if player
+		CakeDefence cd = (CakeDefence) _.getGameController().getGame(GameMode.CD); //Get CD
+		if (cd != null) { //Check if exists
+			if (cd.getGameState() == GameState.playing) { //Check if playing
+				cd.mobDies(event.getEntity().getUniqueId());
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onEntityCombust(EntityExplodeEvent event) {
+		if (event.getEntity() instanceof Player) return;
+		CakeDefence cd = (CakeDefence) _.getGameController().getGame(GameMode.CD); //Get CD
+		if (cd != null) { //Check if exists
+			if (cd.getGameState() == GameState.playing) { //Check if playing
+				cd.mobDies(event.getEntity().getUniqueId());
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerRespawn(PlayerRespawnEvent event) {
+		GamePlayer gP = getGamePlayer(event.getPlayer());
+		if (gP == null) return;
+		gP.getGame().Events.onPlayerRespawn(gP, event);
+	}
+	
+	@EventHandler
+	public void onSlimeSplit(CreatureSpawnEvent event) {
+		if (event.getSpawnReason() == SpawnReason.SLIME_SPLIT) { //Check if slime split
+			CakeDefence cd = (CakeDefence) _.getGameController().getGame(GameMode.CD); //Get CD
+			if (cd != null) { //Check if CD is running
+				if (cd.getGameState() == GameState.playing) { //Check if Playing
+					cd.slimeSpawns(event.getEntity()); //Call function
+				}
+			}
+		}
+		
+	}
+	
 	
 }

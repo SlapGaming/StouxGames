@@ -11,6 +11,7 @@ public class SavedRegion {
 
 	//The saved blocks
 	private HashMap<Block, Material> blocksMap;
+	private ArrayList<Block> blocks;
 	
 	//The name of the region
 	private String regionname;
@@ -22,6 +23,7 @@ public class SavedRegion {
 	 */
 	public SavedRegion(ArrayList<Block> blocks, String regionname) {
 		this.regionname = regionname;
+		this.blocks = blocks;
 		blocksMap = new HashMap<>();
 		for (Block block : blocks) {
 			blocksMap.put(block, block.getType());
@@ -53,6 +55,26 @@ public class SavedRegion {
 		for (Block block : blocksMap.keySet()) {
 			block.setType(m);
 		}
+	}
+	
+	/**
+	 * Set the whole region to a particular block
+	 * @param m The material
+	 * @param data The data value (Example: Color of wool)
+	 */
+	public void setRegionToMaterial(Material m, byte data) {
+		for (Block block : getBlocks()) {
+			block.setType(m);
+			block.setData(data);
+		}
+	}
+	
+	/**
+	 * Get all blocks in this region
+	 * @return blocks
+	 */
+	public ArrayList<Block> getBlocks() {
+		return blocks;
 	}
 	
 }

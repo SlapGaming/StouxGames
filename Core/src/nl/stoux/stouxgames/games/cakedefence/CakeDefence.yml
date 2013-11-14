@@ -1,0 +1,30 @@
+### StouxGames
+### Cake Defence Config
+
+#Locations
+spawn: empty
+spectate: empty
+
+#Surrounding region
+main: cakedefence
+
+#Dies Region
+lava: empty
+  
+#Music thingy - Redstone torch
+music: empty
+
+#Spawner regions
+spawner1: empty
+spawner2: empty
+spawner3: empty
+spawner4: empty
+spawner5: empty
+spawner6: empty
+spawner7: empty
+spawner8: empty
+spawner9: empty
+spawner10: empty
+spawner11: empty
+spawner12: empty
+

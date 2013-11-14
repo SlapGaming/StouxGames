@@ -6,6 +6,7 @@ import nl.stoux.stouxgames.commands.CommandHandler;
 import nl.stoux.stouxgames.external.TabControl;
 import nl.stoux.stouxgames.games.AbstractGame;
 import nl.stoux.stouxgames.games.GameController;
+import nl.stoux.stouxgames.games.cakedefence.CakeDefence;
 import nl.stoux.stouxgames.games.sonic.Sonic;
 import nl.stoux.stouxgames.games.spleef.Spleef;
 import nl.stoux.stouxgames.games.tntrun.TNTRun;
@@ -134,6 +135,7 @@ public class StouxGames extends JavaPlugin {
 		gameController.addGame(new Spleef());
 		gameController.addGame(new TNTRun());
 		gameController.addGame(new Sonic());
+		gameController.addGame(new CakeDefence());
 	}
 	
 	/**

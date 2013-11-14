@@ -4,6 +4,7 @@ import nl.stoux.stouxgames.commands.AbstractCommand;
 import nl.stoux.stouxgames.games.AbstractGame;
 import nl.stoux.stouxgames.games.GameController;
 import nl.stoux.stouxgames.games.GameMode;
+import nl.stoux.stouxgames.games.cakedefence.CakeDefence;
 import nl.stoux.stouxgames.util._;
 
 import org.bukkit.ChatColor;
@@ -70,7 +71,9 @@ public class StouxGamesCommand extends AbstractCommand {
 			}
 			game.reloadGame();
 			break;
-			
+		case "mobsleft":
+			CakeDefence cd = (CakeDefence) _.getGameController().getGame(GameMode.CD);
+			cd.getAliveMobs(null);
 		}
 		return true;
 	}

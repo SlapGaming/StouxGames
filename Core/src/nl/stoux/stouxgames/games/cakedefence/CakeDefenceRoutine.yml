@@ -1,0 +1,31 @@
+### StouxGames 
+### Cake Defence Routine
+
+#Name
+name: "Stoux' Madness"
+
+#Number of rounds
+rounds: 12
+
+###
+### Rounds
+###
+round1:
+   mobs:
+      spider: 12
+      zombie: 12
+   reward:
+      everyone: [Apple:4,Steak:2]
+      bad: [wooden_sword:1]
+      mediocre: [iron_sword(Sharpness-4|Knockback-2):1]
+      good: [diamond_sword(Knockback_2):1]
+
+
+
+
+#Start armor
+start:
+   boots: [leather_boots:1]
+   legs: [leather_legs(Protection_1):1]
+   body: [leather_chest:1]
+   helmet: [iron_helmet:1]

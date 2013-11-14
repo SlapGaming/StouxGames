@@ -58,10 +58,10 @@ public class PressurePadHandler {
 		}
 		switch (pads.get(loc)) {
 		case CDJoin:
-			notSupported(p);
+			gameController.getGame(GameMode.CD).playerJoins(p);
 			break;
 		case CDSpectate:
-			notSupported(p);
+			gameController.getGame(GameMode.CD).playerJoinsSpectate(p);
 			break;
 		case ParkourJoin:
 			notSupported(p);

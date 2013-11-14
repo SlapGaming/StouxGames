@@ -193,6 +193,10 @@ public class Spleef extends AbstractGame {
 		}
 	}
 	
+	@Override
+	public Location getLobby() {
+		return lobby;
+	}
 	
 	/*
 	 * 
@@ -389,8 +393,9 @@ public class Spleef extends AbstractGame {
 			return;
 		}
 		
-		players.put(gP.getName(), gP);
+		_.msg(gP.getPlayer(), gm, "You have joined spleef!");
 		broadcastToPlayers(gP.getName() + " has joined spleef!");
+		players.put(gP.getName(), gP);
 		
 		if (state == GameState.lobby) {
 			//Check number of players

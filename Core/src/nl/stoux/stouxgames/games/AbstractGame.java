@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.mcsg.double0negative.tabapi.TabAPI;
@@ -191,4 +192,9 @@ public abstract class AbstractGame {
 	 */
 	public abstract GamePlayer playerJoinsSpectate(Player p);
 	
+	/**
+	 * Get the lobby and/or spectate location
+	 * @return the location
+	 */
+	public abstract Location getLobby();
 }
