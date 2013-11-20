@@ -141,7 +141,7 @@ public class EventListener implements Listener {
 		CakeDefence cd = (CakeDefence) _.getGameController().getGame(GameMode.CD); //Get CD
 		if (cd != null) { //Check if exists
 			if (cd.getGameState() == GameState.playing) { //Check if playing
-				cd.mobDies(event.getEntity().getUniqueId());
+				cd.mobDies(event.getEntity().getUniqueId(), event);
 			}
 		}
 	}

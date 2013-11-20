@@ -1,22 +1,17 @@
 package nl.stoux.stouxgames.games.cakedefence;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import nl.stoux.stouxgames.games.cakedefence.CakeDefenceRoutine.CDRound;
 import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.player.PlayerState;
-import nl.stoux.stouxgames.util._;
 import nl.stoux.stouxgames.util._T;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -61,28 +56,10 @@ public class CakeDefenceGame extends BukkitRunnable {
 		mobCleaner = new MobCleaner(10);
 		mobCleaningTask = _T.runTimer_Sync(mobCleaner, 10, 10);
 		
-		//Get armor
-		ItemStack boots = null, legs = null, body = null, helmet = null;		
-		ItemStack[] startArmor = routine.getStartArmor();
-		if (startArmor != null) {
-			boots = startArmor[0];
-			legs = startArmor[1];
-			body = startArmor[2];
-			helmet = startArmor[3];
-		}
-		ItemStack[] startInventory = routine.getStartInventory();
-		
-		if (startArmor != null || startInventory != null) {
-			//Give armor
-			for (GamePlayer gP : cd.getPlayers()) {
-				if (gP.getState() == PlayerState.playing) {
-					PlayerInventory inv = gP.getPlayer().getInventory(); //Get de player's inventory
-					if (boots != null) inv.setBoots(boots); //Set boots
-					if (legs != null) inv.setLeggings(legs); //Set legs
-					if (body != null) inv.setChestplate(body); //Set body
-					if (helmet != null) inv.setHelmet(helmet); //set helmet
-					if (startInventory != null) inv.addItem(startInventory); //Give inventory
-				}
+		//Give armor
+		for (GamePlayer gP : cd.getPlayers()) {
+			if (gP.getState() == PlayerState.playing) {
+				routine.giveStartItems(gP.getPlayer());
 			}
 		}
 		
@@ -146,21 +123,14 @@ public class CakeDefenceGame extends BukkitRunnable {
 		state = GameState.Cooldown;
 		cd.broadcastToPlayers("All mobs have been eliminated, good job! Get ready for the next round!");
 		
+		//Give rewards
 		CDRound cdRound = roundTask.getRound(); //Get the round
-		ItemStack[] everyone = cdRound.getEveryoneReward(); //Get the 'everyone' reward
 		for (GamePlayer gP : cd.getPlayers()) {
 			if (gP.getState() == PlayerState.playing) {
-				PlayerInventory inv = gP.getPlayer().getInventory(); //Get the player's inventory
-				if (everyone != null) { //Give the everyone reward if not null
-					inv.addItem(everyone);
-				}
-				ItemStack[] personalReward = cdRound.getReward(_.getRandomInt(3)); //Get personal reward (based on level)
-				if (personalReward != null ) { //Give the reward if not null
-					inv.addItem(personalReward);
-				}
+				cdRound.giveReward(gP.getPlayer());
 			}
 		}
-		
+				
 		mobCleaner.disableTimeout(); //Disable the timeout feature on the mob cleaner
 		roundTask = null;
 		
@@ -170,7 +140,7 @@ public class CakeDefenceGame extends BukkitRunnable {
 			public void run() {
 				startRound(); //Start round
 			}
-		}, 200);
+		}, 300);
 		
 	}
 	
@@ -205,19 +175,40 @@ public class CakeDefenceGame extends BukkitRunnable {
 	}
 		
 	/**
-	 * A mob dies
-	 * @param id The entity's {@link UUID}
+	 * A mob dies with an event
+	 * @param ID The ID of the entity
+	 * @param event The death event
 	 */
-	public void mobDies(UUID id) {
-		if (!spawnedMobs.containsKey(id.toString())) {
+	public void mobDies(UUID ID, EntityDeathEvent event) {
+		if (!routine.hasMobDrops()) {
+			event.getDrops().clear();
+		}
+		mobDies(ID);
+	}
+	
+	/**
+	 * A mob dies
+	 * @param ID The ID of the entity
+	 */
+	public void mobDies(UUID ID) {
+		String id = ID.toString();
+		if (!spawnedMobs.containsKey(id)) {
 			return;
 		}
-		spawnedMobs.remove(id.toString());
+		spawnedMobs.remove(id);
 		if (state == GameState.RoundEndedMobs) { //Check if if game is waiting for remaining mobs
 			if (spawnedMobs.size() == 0) { //No mobs left -> End round
 				giveReward(); //Give reward
 			}
 		}
+	}
+	
+	/**
+	 * Get the routine
+	 * @return the routine
+	 */
+	public CakeDefenceRoutine getRoutine() {
+		return routine;
 	}
 	
 	
@@ -236,11 +227,6 @@ public class CakeDefenceGame extends BukkitRunnable {
 		private int spawnPerTicks;
 		private int tillNextSpawn;
 		
-		//Mobs
-		private int differentEntities = 0;
-		private ArrayList<MobType> entities;
-		private HashMap<MobType, Integer> mobs;
-		private int totalMobsLeft;
 		
 		
 		/**
@@ -250,26 +236,16 @@ public class CakeDefenceGame extends BukkitRunnable {
 		 */
 		public RoundTask(CDRound round) {
 			this.round = round;
-			mobs = round.getMobs();
-			entities = new ArrayList<>();
 			
 			//Set to 0
-			totalMobsLeft = 0;
-			differentEntities = 0;
 			tillNextSpawn = 0;
 			tick = 0;
 			
 			//Set bools
 			ended = false;
-			
-			for (Entry<MobType, Integer> entry : mobs.entrySet()) { //Add types to the arraylist
-				entities.add(entry.getKey());
-				differentEntities++;
-				totalMobsLeft = totalMobsLeft + entry.getValue();
-			}
-			
+						
 			//Calculate ticks per mob
-			double ticksDouble = (31.5 * 20) / totalMobsLeft;
+			double ticksDouble = (31.5 * 20) / round.getNumberOfMobsLeft();
 			spawnPerTicks = (int) Math.floor(ticksDouble);
 			
 			//Check if not too low
@@ -282,30 +258,16 @@ public class CakeDefenceGame extends BukkitRunnable {
 		 * Spawn a mob
 		 */
 		private void spawnMob() {
-			if (differentEntities == 0) {
+			if (round.getDifferentMobs() == 0) {
 				if (ended == false) {
 					endThisRound();
 				}
 				return;
 			}
-			MobType type = entities.get(_.getRandomInt(differentEntities)); //Get the Type
-			int mobsLeft = mobs.get(type); //Get number of mobs that still need be spawned (of this type)
-			mobsLeft--; //Decrease by 1
-			if (mobsLeft == 0) { //If no more need to be spawned after this remove the mob from the lists
-				mobs.remove(type);
-				entities.remove(type);
-				differentEntities--;
-			} else { //Else update the amount left
-				mobs.put(type, mobsLeft);
-			}
 			
-			//Spawn mobs			
-			for (LivingEntity le : MobType.spawnMob(type, cd.getSpawnLocation())) {
+			for (LivingEntity le : round.spawnMob(cd.getSpawnLocation())) {
 				spawnedMobs.put(le.getUniqueId().toString(), le); //Add to map
 			}
-			
-			//Process
-			totalMobsLeft--;
 		}
 		
 		@Override
@@ -315,7 +277,7 @@ public class CakeDefenceGame extends BukkitRunnable {
 				endThisRound();
 				return;
 			} else if (tick == 0) { //Check if start of game
-				cd.broadcastToPlayers("The next round has started! " + ChatColor.GRAY + "(Round " + round.getRound() + "/" + routine.getNrOfRounds() + ")");
+				cd.broadcastToPlayers("The next round has started! " + ChatColor.GRAY + "(Round " + round.getRoundNumber() + "/" + routine.getNrOfRounds() + ")");
 				tillNextSpawn = 1;
 			}
 			

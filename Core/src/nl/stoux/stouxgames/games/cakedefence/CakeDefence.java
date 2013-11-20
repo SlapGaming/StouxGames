@@ -1,6 +1,8 @@
 package nl.stoux.stouxgames.games.cakedefence;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -14,6 +16,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
@@ -21,6 +25,8 @@ import org.bukkit.util.Vector;
 
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
+import entity.main.Routine;
 
 import nl.stoux.stouxgames.games.AbstractGame;
 import nl.stoux.stouxgames.games.GameMode;
@@ -40,6 +46,7 @@ public class CakeDefence extends AbstractGame {
 	//The game
 	private BukkitTask gameTask;
 	private CakeDefenceGame game;
+	private CakeDefence instance;
 	
 	//Main Stuff
 	private Location spawnLocation;
@@ -57,10 +64,11 @@ public class CakeDefence extends AbstractGame {
 	private int openSpawnersSize;
 	
 	//Routines
-	private ArrayList<CakeDefenceRoutine> routines;
+	private ArrayList<File> routines;
 
 	public CakeDefence() {
 		super(GameMode.CD);
+		this.instance = this;
 		yaml = new YamlStorage("CakeDefence");
 		config = yaml.getConfig();
 		players = new HashMap<>();
@@ -226,14 +234,24 @@ public class CakeDefence extends AbstractGame {
 	private void getRoutines() {
 		String sep = System.getProperty("file.separator");
 		routines = new ArrayList<>();
-		File f = new File (_.getPlugin().getDataFolder().getAbsolutePath() + sep + "cakedefence" + sep);
+		File f = new File (_.getPlugin().getDataFolder().getAbsolutePath() + sep + "cakedefence");
 		if (!f.exists()) {
 			f.mkdirs();
 		}
-		for (String routine : f.list()) {
-			if (routine.contains(".yml")) {
-				CakeDefenceRoutine cdR = new CakeDefenceRoutine(routine.replace(".yml", "")); //Create the Routine
-				if (cdR.setup()) routines.add(cdR); //Set it up, if correct -> Put in list
+		for (File foundFile : f.listFiles()) {
+			if (!foundFile.getName().contains(".stx")) continue;
+			try {
+				Object foundObject;
+				try (FileInputStream fis = new FileInputStream(foundFile); ObjectInputStream ois = new ObjectInputStream(fis);) {
+					foundObject = ois.readObject();
+				}
+				if (foundObject instanceof Routine) {
+					if (((Routine) foundObject).isComplete()) {
+						routines.add(foundFile);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -283,31 +301,62 @@ public class CakeDefence extends AbstractGame {
 		_.broadcast(gm, "A new game of Cake Defence is starting! Come spectate & support the players!");
 		state = GameState.starting;
 		
-		//Pick Routine
-		CakeDefenceRoutine pickedRoutine = routines.get(_.getRandomInt(routines.size()));
-		
-		//Broadcast routine info
-		broadcastToPlayers("Picked Routine: " + ChatColor.AQUA + pickedRoutine.getRoutinename() + 
-				ChatColor.WHITE + " - " + pickedRoutine.getNrOfRounds() + " rounds " + 
-				ChatColor.GRAY + "(Author: " + pickedRoutine.getAuthor() + ")");
-		
-		for (GamePlayer gP : getPlayers()) { //Loop thru players
-			gP.resetPlayer();
-			switch (gP.getState()) {
-			case lobby: case lobbyPlayer: case playing: case gameover: case joining:
-				gP.getPlayer().teleport(spawnLocation);
-				gP.setState(PlayerState.playing);
-				break;
-			case lobbySpectator: case spectating:
-				gP.setState(PlayerState.spectating);
-				break;
+		_T.run_ASync(new Runnable() {
+			
+			@Override
+			public void run() {
+				broadcastToPlayers("Selecting Routine...");
+				CakeDefenceRoutine selectedRoutine = null;
+				
+				File f = routines.get(_.getRandomInt(routines.size()));
+				
+				try (FileInputStream fis = new FileInputStream(f); ObjectInputStream ois = new ObjectInputStream(fis);) {
+					selectedRoutine = new CakeDefenceRoutine((Routine) ois.readObject());
+				} catch (Exception e) {
+					//Something went horribly wrong
+					broadcastToPlayers("Something went horribly wrong. Cake Defence is being shut down! Warn Stoux!");
+					_.log(Level.SEVERE, gm, "Loading routine failed. Exception: " + e.getMessage());
+					_T.run_Sync(new Runnable() {
+						
+						@Override
+						public void run() {
+							disableGame();
+						}
+					});
+					return;
+				}
+				
+				final CakeDefenceRoutine pickedRoutine = selectedRoutine;
+				_T.run_Sync(new Runnable() {
+					
+					@Override
+					public void run() {
+						//Broadcast routine info
+						broadcastToPlayers("Picked Routine: " + ChatColor.AQUA + pickedRoutine.getRoutinename() + 
+								ChatColor.WHITE + " - " + pickedRoutine.getNrOfRounds() + " rounds " + 
+								ChatColor.GRAY + "(Author: " + pickedRoutine.getAuthor() + ")");
+						
+						for (GamePlayer gP : getPlayers()) { //Loop thru players
+							gP.resetPlayer();
+							switch (gP.getState()) {
+							case lobby: case lobbyPlayer: case playing: case gameover: case joining:
+								gP.getPlayer().teleport(spawnLocation);
+								gP.setState(PlayerState.playing);
+								break;
+							case lobbySpectator: case spectating:
+								gP.setState(PlayerState.spectating);
+								break;
+							}
+						}
+						
+						//Start the game
+						game = new CakeDefenceGame(instance, pickedRoutine);
+						state = GameState.playing;
+						gameTask = _T.runLater_Sync(game, 10);		
+					}
+				});
 			}
-		}
-		
-		//Start the game
-		game = new CakeDefenceGame(this, pickedRoutine);
-		state = GameState.playing;
-		gameTask = _T.runLater_Sync(game, 10);		
+		});
 	}
 	
 	/**
@@ -324,6 +373,7 @@ public class CakeDefence extends AbstractGame {
 			case playing: //Add to winning players
 				if (winners == null) winners = gP.getName();
 				else winners = winners + ", " + gP.getName();
+				gP.getPlayer().teleport(spectateLocation);
 			case gameover: case joining: case lobby: case lobbyPlayer:
 				willingPlayers++; //Increase willing players
 				gP.setState(PlayerState.lobbyPlayer);
@@ -335,6 +385,15 @@ public class CakeDefence extends AbstractGame {
 			gP.resetPlayer();
 		}
 		
+		for (Entity e : _.getWorld().getEntities()) {
+			if (!(e instanceof Player)) {
+				Location loc = e.getLocation();
+				if (mainRegion.contains(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) {
+					e.remove();
+				}
+			}
+		}
+		
 		if (winners != null) {
 			_.broadcast(gm, "Victory! The following players were able to defend the cake: " + winners);
 		} else {
@@ -344,7 +403,7 @@ public class CakeDefence extends AbstractGame {
 		if (willingPlayers > 1) { //Check if enough players for another round 
 			lobbyCountdown(1);
 		} else {
-			broadcastToPlayers("There are not enough players.. We need " + (5 - willingPlayers) + " more player(s).");
+			broadcastToPlayers("There are not enough players.. You need " + (5 - willingPlayers) + " more player(s).");
 			state = GameState.lobby;
 		}
 		
@@ -368,11 +427,15 @@ public class CakeDefence extends AbstractGame {
 	 * A player has died
 	 * @param gP The player
 	 */
-	public void onPlayerDies(GamePlayer gP) {
+	public void onPlayerDies(GamePlayer gP, PlayerDeathEvent event) {
 		//Check if correct state
 		if (state != GameState.playing) return;
 		if (gP.getState() != PlayerState.playing) return;
 		if (game == null) return;
+		
+		if (!game.getRoutine().hasPlayerDrops()) {
+			event.getDrops().clear();
+		}
 		
 		//Game over
 		gP.setState(PlayerState.gameover);
@@ -474,12 +537,22 @@ public class CakeDefence extends AbstractGame {
 	 */
 	
 	/**
-	 * Event called when a mob has died
-	 * @param mobID
+	 * Event called when a mob has dies that does not drop items
+	 * @param id
 	 */
-	public void mobDies(UUID mobID) {
+	public void mobDies(UUID id) {
 		if (game == null) return;
-		game.mobDies(mobID);
+		game.mobDies(id);
+	}
+
+	/**
+	 * Event called when a mob dies
+	 * @param id
+	 * @param event
+	 */
+	public void mobDies(UUID id, EntityDeathEvent event) {
+		if (game == null) return;
+		game.mobDies(id, event);
 	}
 	
 	/**

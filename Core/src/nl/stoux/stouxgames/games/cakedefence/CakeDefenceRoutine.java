@@ -1,467 +1,355 @@
 package nl.stoux.stouxgames.games.cakedefence;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import nl.stoux.stouxgames.storage.YamlStorage;
 import nl.stoux.stouxgames.util._;
 
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.Location;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.potion.PotionEffectType;
+import entity.collections.RewardCollection;
+import entity.collections.Round;
+import entity.enums.EnchantmentType;
+import entity.enums.ItemEnum;
+import entity.enums.PotionItemType;
+import entity.instance.Item;
+import entity.instance.Mob;
+import entity.instance.PotionEffect;
+import entity.instance.PotionItem;
+import entity.main.GeneralSettings;
+import entity.main.Routine;
+import entity.main.StartReward;
 
 public class CakeDefenceRoutine {
-
-	//Setup
-	private Pattern enchantPattern;
-	private Pattern damagePattern;
 	
-	//File info
-	private String filename;
-	private YamlStorage yaml;
-	private FileConfiguration config;
-
-	//Routine info
-	private String routinename;
-	private String author;
+	/*
+	 * General info
+	 */
 	private int nrOfRounds;
-	
-	//General Settings
+	private String author;
+	private String routinename;
 	private boolean mobDrops;
 	private boolean playerDrops;
 	
-	//Start Armor
-	private boolean startStuff;
-	private ItemStack[] startArmor;
-	private ItemStack[] startInventory;
-	
-	//Round stuff
-	private HashMap<Integer, CDRound> rounds;
-	
-	public CakeDefenceRoutine(String filename) {
-		this.filename = filename;
-		enchantPattern = Pattern.compile("[(].*[)]");
-        damagePattern = Pattern.compile("[{].*[}]");
-	}
-	
-	public boolean setup() {
-		yaml = new YamlStorage("cakedefence" + System.getProperty("file.separator") + filename);
-		config = yaml.getConfig();
-		
-		startStuff = false;
-		
-		//Get general info
-		routinename = config.getString("name");
-		nrOfRounds = config.getInt("rounds");
-		author = config.getString("author");
-		if (author == null) {
-			author = "Unknown";
-		}
-		
-		//Get settings
-		mobDrops = config.getBoolean("mob-drop-ondeath");
-		playerDrops = config.getBoolean("player-drop-ondeath");
-		
-		
-		if (routinename == null || nrOfRounds < 1) { //Check name & rounds
-			_.log(Level.SEVERE, "Invalid Cake Defence routine: " + routinename + ". (Routine name/rounds)");
-			return false;
-		}
-		
-		//Start stuff
-		if (config.contains("start")) {
-			startArmor = new ItemStack[4];
-			startStuff = true;
-			int x = 0;
-			while (x < 4) { //Fill armor
-				String path = "";
-				switch (x) {
-				case 0: path = "boots";	break;
-				case 1: path = "legs";	break;
-				case 2: path = "body";	break;
-				case 3: path = "helmet"; break;
-				}
-				ItemStack[] stack = getItems("start." + path);
-				if (stack != null) {
-					if (stack.length > 0) {
-						startArmor[x] = stack[0];
-					}
-				}
-				x++;
-			}
-			startInventory = getItems("start.inventory");
-		}
-		
-		//Round stuff
-		rounds = new HashMap<>();
-		int round = 1;
-		while (round <= nrOfRounds) {
-			rounds.put(round, new CDRound(round));
-			round++;
-		}
-		return true;
-	}
-	
-	/**
-	 * Get the items specified in a path
-	 * @param path The path
-	 * @return The stack of items
+	/*
+	 * Start info
 	 */
-	private ItemStack[] getItems(String path) {
-		String itemString = config.getString(path); //Get string
-		if (itemString == null) return null; //Check if not null
-		String items = itemString.replace("[","").replace("]", "");
-		String[] item = items.split(",");
-		ArrayList<ItemStack> array = new ArrayList<>();
-		for (String i : item) {
-			try {
-				array.add(parseItem(i));
-			} catch (Exception e) {
-				_.log(Level.WARNING, "Failed to parse item. Item: " + i + " | Exception: " + e.getMessage());
-			}
+	private ItemStack helmet;
+	private ItemStack chestplate;
+	private ItemStack leggings;
+	private ItemStack boots;
+	private ItemStack[] inventory;
+	
+	/*
+	 * Rounds
+	 */
+	private ArrayList<CDRound> rounds;
+	
+	public CakeDefenceRoutine(Routine r) {
+		//General settings
+		GeneralSettings gs = r.getGeneralSettings();
+		author = gs.getAuthor();
+		routinename = gs.getRoutinename();
+		mobDrops = gs.isMobDropOnDeath();
+		playerDrops = gs.isPlayerDropOnDeath();
+		
+		//Rounds info
+		nrOfRounds = r.getRounds().size();
+		
+		//Parse start info
+		StartReward sr = r.getStartReward();
+		helmet = parseItem(sr.getHead());
+		chestplate = parseItem(sr.getChest());
+		leggings = parseItem(sr.getLegs());
+		boots = parseItem(sr.getBoots());
+		inventory = parseRewardCollection(sr.getStartInventory());
+		
+		//Parse rounds
+		rounds = new ArrayList<>();
+		int roundNumber = 1;
+		for (Round round : r.getRounds()) {
+			rounds.add(new CDRound(round, roundNumber));
+			roundNumber++;
 		}
-		return array.toArray(new ItemStack[array.size()]);
 	}
 	
-	/**
-	 * Parse the found string to an ItemStack
-	 * @param s The string
-	 * @return The ItemStack
-	 * @throws Exception any exception can be thrown
-	 */
-	private ItemStack parseItem(String s) throws Exception {
-		String[] split = s.split(":");
-		
-		
-		//Matchers
-		Matcher e = enchantPattern.matcher(s);
-		Matcher d = damagePattern.matcher(s);
-		
-		//Strings
-		String enchant = null;
-		String damage = null;
-		String item = split[0];
-		
-		//Enchants
-		if (e.find()) {
-			enchant = item.substring(e.start(), e.end());
-		}
-		
-		//Damage
-		if (d.find()) {
-			damage = item.substring(d.start(), d.end());
-		}
-		
-		//Remove enchants from Item String
-		if (enchant != null) {
-			item = item.replace(enchant, "");
-		}
-		
-		//Remove damage from Item String
-		if (damage != null) {
-			item = item.replace(damage, "");
-		}
-		
-		//Amount
-		int amount = Integer.parseInt(split[1]);
-		
-		
-		
-		//Create item
-		ItemStack stack;
-		
-		if (item.contains("=")) { //Check if data value found
-			String[] splitItem = item.split("=");
-			stack = new ItemStack(Integer.parseInt(splitItem[0]), amount, Short.parseShort(splitItem[1]));
-		} else {
-			stack = new ItemStack(Integer.parseInt(item), amount);
-		}
-		
-		if (damage != null) { //Put damage counter on it
-			damage = damage.replace("{", "").replace("}", "").replace("%", "");
-			int procent = Integer.parseInt(damage);
-			int maxDurability = stack.getType().getMaxDurability();
-			int durability = (int) Math.ceil(((maxDurability / (double) 100) * procent));
-			stack.setDurability((short) (maxDurability - durability));
-		}
-		
-		if (enchant != null) { //Put enchants on the piece
-			for (Entry<Enchantment, Integer> entry : getEnchantments(enchant).entrySet()) {
-				stack.addUnsafeEnchantment(entry.getKey(), entry.getValue());
-			}
+	private ItemStack[] parseRewardCollection(RewardCollection rc) {
+		if (rc == null) return null;
+		ArrayList<Item> items = rc.getItems();
+		ItemStack[] stack = new ItemStack[items.size()];
+		int x = 0;
+		for (Item i : items) {
+			stack[x] = parseItem(i);
+			x++;
 		}
 		return stack;
 	}
 	
-	/**
-	 * Get a hashmap of all the enchantments in the string
-	 * @param enchs The string of enchantments
-	 * @return The HashMap with enchants - Key: Enchantment | Value: Level
-	 */
-	private HashMap<Enchantment, Integer> getEnchantments(String enchs) {
-		String fullEnch = enchs.replace("(", "").replace(")", "").replace("|", "=");
-		String[] split = fullEnch.split("=");
-		HashMap<Enchantment, Integer> eMap = new HashMap<>();
-		for (String s : split) {
-			String[] enchanment = s.split("-");
-			Enchantment e;
-			switch (enchanment[0].toLowerCase()) {
-			//Melee
-			case "sharpness": case "sharp":
-				e = Enchantment.DAMAGE_ALL;
-				break;
-			case "smite":
-				e = Enchantment.DAMAGE_UNDEAD;
-				break;
-			case "bane_of_arthropods": case "arthropods": case "bane":
-				e = Enchantment.DAMAGE_ARTHROPODS;
-				break;
-			case "knockback": case "knock":
-				e = Enchantment.KNOCKBACK;
-				break;
-			case "fire_aspect":
-				e = Enchantment.FIRE_ASPECT;
-				break;
-			case "looting":
-				e = Enchantment.LOOT_BONUS_MOBS;
-				break;				
-				
-			//Bows
-			case "power":
-				e = Enchantment.ARROW_DAMAGE;
-				break;
-			case "infinity":
-				e = Enchantment.ARROW_INFINITE;
-				break;
-			case "flame":
-				e = Enchantment.ARROW_FIRE;
-				break;
-			case "punch":
-				e = Enchantment.ARROW_KNOCKBACK;
-				
-			//Armor
-			case "protection":
-				e = Enchantment.PROTECTION_ENVIRONMENTAL;
-				break;
-			case "blast": case "blast_protection":
-				e = Enchantment.PROTECTION_EXPLOSIONS;
-				break;
-			case "projectile": case "projectile_protection":
-				e = Enchantment.PROTECTION_PROJECTILE;
-				break;
-			case "fire_protection":
-				e = Enchantment.PROTECTION_FIRE;
-				break;
-			case "fall_protection": case "feather_falling":
-				e = Enchantment.PROTECTION_FALL;
-				break;
-			case "aqua_affinity": case "aqua":
-				e = Enchantment.WATER_WORKER;
-				break;
-			case "respiration":
-				e = Enchantment.OXYGEN;
-				break;
-			case "thorns":
-				e = Enchantment.THORNS;
-				break;
-				
-			//Other
-			case "unbreaking":
-				e = Enchantment.DURABILITY;
-				break;
-			default: 
-				_.log(Level.WARNING, "Invalid Enchantment found: " + enchanment[0]);
-				continue;
+	private ItemStack parseItem(Item item) {		
+		if (item == null) return null;
+		ItemStack stack;
+		if (item instanceof PotionItem) {
+			PotionItem potion = item.getPotion();
+			int itemID = item.getItemType().getItemID();
+			int amount = item.getAmount();
+			PotionItemType type = potion.getType();
+			if (potion.isSplash()) {
+				stack = new ItemStack(itemID, amount, (short) type.getSplashValue());
+			} else {
+				stack = new ItemStack(itemID, amount, (short) type.getDataValue());
 			}
-			int level = Integer.parseInt(enchanment[1]);
-			if (e.getMaxLevel() < level) level = e.getMaxLevel(); //Max level check
-			eMap.put(e, level); //Put enchantment in the map
+		} else {
+			if (item.getItemType() == ItemEnum.SUPER_GOLDEN_APPLE) {
+				return new ItemStack(item.getItemType().getItemID(), item.getAmount(), (short) 1);
+			}
+			stack = new ItemStack(item.getItemType().getItemID(), item.getAmount());
+			if (item.hasDurability()) {
+				short maxDurability = stack.getType().getMaxDurability();
+				int foundDurability = item.getDurability();
+				if (foundDurability != 100) {
+					int durabiltiy = (int) ((double) maxDurability - ((double) foundDurability * ((double ) maxDurability / (double) 100)));
+					stack.setDurability((short) durabiltiy);
+				}
+			}
+			if (item.hasEnchants()) {
+				for (Entry<EnchantmentType, Integer> entry : item.getEnchants().entrySet()) {
+					Enchantment e = Enchantment.getByName(entry.getKey().toString());
+					stack.addEnchantment(e, entry.getValue());
+				}
+			}
 		}
-		return eMap;
+		return stack;
 	}
-	
-	public class CDRound {
-		
-		//This round
-		private int round;
-		
-		//Hashmap with the mobs. Key: Type of mob | Value: Number that needs to spawn
-		private HashMap<MobType, Integer> mobs;
-		
-		//Rewards map. 0 == Bad, 1 == Mediocre, 2 == Good
-		private HashMap<Integer, ItemStack[]> rewards;
-		
-		//Itemstack with the price everyone gets
-		private ItemStack[] everyoneReward;
-		
-		/**
-		 * Create a new Cake Defence Round -- Belongs to a routine
-		 * @param round The round number
-		 */
-		public CDRound(int round) {
-			this.round = round;
-			
-			//Create maps
-			rewards = new HashMap<>();
-			mobs = new HashMap<>();
-			
-			//Parse mobs
-			ConfigurationSection mobSection = config.getConfigurationSection("round" + round + ".mobs");
-			for (String key : mobSection.getKeys(false)) {
-				MobType type = MobType.valueOf(key);
-				int amount = mobSection.getInt(key);
-				if (type == null || amount < 1) {
-					System.out.println("Failed to get mob. Value found: '" + key + "'");
-					continue;
-				}
-				mobs.put(type, amount);
-			}
-			
-			//Parse rewards
-			everyoneReward = getItems("round" + round + ".reward.everyone");
-			
-			int x = 0;
-			while (x < 3) { //Loop thru reward levels
-				String reward = null;
-				switch (x) {
-				case 0: reward = "bad"; break;
-				case 1: reward = "mediocre"; break;
-				case 2: reward = "good"; break;
-				}
-				ItemStack[] stack = getItems("round" + round + ".reward." + reward); //Get reward from config
-				if (stack != null) {
-					rewards.put(x, stack);
-				}
-				x++;
-			}
-		}
-		
-		/**
-		 * Get the number of different mobs
-		 * @return the number
-		 */
-		public int getDifferentMobs() {
-			return mobs.size();
-		}
-		
-		/**
-		 * Get the current round number
-		 * @return the number
-		 */
-		public int getRound() {
-			return round;
-		}
-		
-		/**
-		 * Get this round's reward
-		 * @return The Reward (ItemStack array) or null if no reward
-		 */
-		public ItemStack[] getEveryoneReward() {
-			return everyoneReward;
-		}
-		
-		/**
-		 * Get the reward of this round
-		 * Levels: 0 == Bad | 1 == Mediocre | 2 == Good
-		 * @param level The reward level
-		 * @return The ItemStack array with the rewards or null
-		 */
-		public ItemStack[] getReward(int level) {
-			return rewards.get(level);
-		}
-		
-		/**
-		 * Returns a new HashMap with mobs
-		 * @return the mobs
-		 */
-		public HashMap<MobType, Integer> getMobs() {
-			return new HashMap<MobType, Integer>(mobs);
-		}
-		
-	}
-	
 
-	/*
-	 * Public methods
-	 */
-	
 	/**
-	 * Get the author of this routine
+	 * Get Author
 	 * @return the author
 	 */
 	public String getAuthor() {
 		return author;
 	}
-	
+
 	/**
-	 * Get the name of this routine
+	 * Get the routinename
 	 * @return the name
 	 */
 	public String getRoutinename() {
 		return routinename;
 	}
-	
+
 	/**
-	 * The mobs should drop items when they die
-	 * @return yes/no
+	 * Check if mob drops are enabled
+	 * @return enabled
 	 */
 	public boolean hasMobDrops() {
 		return mobDrops;
 	}
-	
+
 	/**
-	 * Players should drop items (inventory) when they die 
-	 * @return yes/no
+	 * Check if player drops are enabled
+	 * @return enabled
 	 */
 	public boolean hasPlayerDrops() {
 		return playerDrops;
 	}
-	
+
 	/**
-	 * Get number of rounds
+	 * Get the number of rounds this routine has
 	 * @return number
 	 */
 	public int getNrOfRounds() {
 		return nrOfRounds;
 	}
 	
+	/*
+	 *******************
+	 * Start Inventory *
+	 *******************
+	 */
 	/**
-	 * Get the Cake Defence Round of this routine
-	 * @param round The round
-	 * @return The CDRound or null
+	 * Give the player their starting inventory for this routine
+	 * @param p The player
+	 */
+	public void giveStartItems(Player p) {
+		PlayerInventory pi = p.getInventory();
+		if (helmet != null) pi.setHelmet(helmet);
+		if (chestplate != null) pi.setChestplate(chestplate);
+		if (leggings != null) pi.setLeggings(leggings);
+		if (boots != null) pi.setBoots(boots);
+		giveReward(inventory, pi);
+	}
+	
+	private static void giveReward(ItemStack[] stack, PlayerInventory pi) {
+		if (stack != null) {
+			pi.addItem(stack);
+		}
+	}
+		
+	
+	/*
+	 **********
+	 * Rounds *
+	 **********
 	 */
 	public CDRound getRound(int round) {
-		return rounds.get(round);
-	}	
-	
-	/**
-	 * Check if there is any start armor/inventory
-	 * @return yes/no
-	 */
-	public boolean hasStartStuff() {
-		return startStuff;
+		return rounds.get(round - 1);
 	}
 	
-	/**
-	 * Get the Start Armor array
-	 * [0] == Boots | [1] == Legs | [2] == Body | [3] == Helmet
-	 * @return The array with ItemStacks. These can be null.
-	 */
-	public ItemStack[] getStartArmor() {
-		return startArmor;
+	public class CDRound {
+		
+		private int roundNumber;
+		
+		private ItemStack[] badReward;
+		private ItemStack[] mediocreReward;
+		private ItemStack[] goodReward;
+		private ItemStack[] endReward;
+		
+		private ArrayList<CDMob> mobs;
+		private int numberOfMobs;
+		private int differentMobs;
+		
+		public CDRound(Round round, int roundNumber) {
+			this.roundNumber = roundNumber;
+			badReward = parseRewardCollection(round.getBad());
+			mediocreReward = parseRewardCollection(round.getMediocre());
+			goodReward = parseRewardCollection(round.getGood());
+			endReward = parseRewardCollection(round.getEveryone());
+			
+			mobs = new ArrayList<>();
+			numberOfMobs = 0;
+			differentMobs = 0;
+			
+			for (Mob mob : round.getMobs()) {
+				mobs.add(new CDMob(mob));
+				numberOfMobs = numberOfMobs + mob.getAmount();
+				differentMobs++;
+			}
+		}
+		
+		/**
+		 * Spawn a random mob
+		 * @param loc The location for the mob
+		 * @return the spawned mobs
+		 */
+		public LivingEntity[] spawnMob(Location loc) {
+			CDMob mob = mobs.get(_.getRandomInt(differentMobs));
+			LivingEntity[] entities = mob.spawnMob(loc);
+			if (mob.getAmount() == 0) {
+				differentMobs--;
+				mobs.remove(mob);
+			}
+			numberOfMobs--;
+			return entities;
+		}
+		
+		/**
+		 * Give the player a/the reward for this round
+		 * @param p The player
+		 */
+		public void giveReward(Player p) {
+			PlayerInventory pi = p.getInventory();
+			giveReward(endReward, pi); //Give standard reward
+			
+			int random = _.getRandomInt(20); //5% for Good  --  15% for Mediocre  --  30% for Bad
+			switch (random) {
+			case 10: 
+				giveReward(goodReward, pi);
+				break;
+			case 0: case 5: case 15:
+				giveReward(mediocreReward, pi);
+				break;
+			case 1: case 4: case 7: case 12: case 13: case 18:
+				giveReward(badReward, pi);
+				break;
+			}
+		}
+		
+		/**
+		 * Get the number of different mobs left
+		 * @return number of different mobs
+		 */
+		public int getDifferentMobs() {
+			return differentMobs;
+		}
+		
+		/**
+		 * Get the number of mobs that still need to spawn
+		 * @return mobs left
+		 */
+		public int getNumberOfMobsLeft() {
+			return numberOfMobs;
+		}
+		
+		/**
+		 * Get the number of this round
+		 * @return the number
+		 */
+		public int getRoundNumber() {
+			return roundNumber;
+		}
+		
+		private void giveReward(ItemStack[] stack, PlayerInventory pi) {
+			CakeDefenceRoutine.giveReward(stack, pi);
+		}
 	}
 	
-	/**
-	 * Get the Start inventory array
-	 * @return The itemstack array or null
-	 */
-	public ItemStack[] getStartInventory() {
-		return startInventory;
+	public class CDMob {		
+		
+		private int amount; 
+		private MobType type;
+		private boolean hasPotionEffects;
+		private HashSet<org.bukkit.potion.PotionEffect> potionEffects;
+		
+		public CDMob(Mob mob) {
+			amount = mob.getAmount();
+			type = MobType.valueOf(mob.getMobType().toString());
+			hasPotionEffects = mob.hasPotionEffects();
+			if (hasPotionEffects) {
+				potionEffects = new HashSet<>();
+				for (PotionEffect effect : mob.getPotionEffects()) {
+					PotionEffectType type = PotionEffectType.getByName(effect.getType().toString());
+					potionEffects.add(type.createEffect(effect.isInfinite() ? Integer.MAX_VALUE : effect.getLength(), effect.getLevel()));
+				}
+			}
+		}
+		
+		/**
+		 * Spawn an instance of this mob
+		 * @param loc the location
+		 * @return the spawned mobs
+		 */
+		public LivingEntity[] spawnMob(Location loc) {
+			LivingEntity[] entities = MobType.spawnMob(type, loc);
+			if (hasPotionEffects) {
+				for (LivingEntity le : entities) {
+					le.addPotionEffects(potionEffects);
+				}
+			}
+			amount--;
+			return entities;
+		}
+		
+		/**
+		 * Get amount of mobs left
+		 * @return amount
+		 */
+		public int getAmount() {
+			return amount;
+		}
+		
+		/**
+		 * Get the mob type of this mob
+		 * @return the type
+		 */
+		public MobType getType() {
+			return type;
+		}
+		
 	}
-	
 }

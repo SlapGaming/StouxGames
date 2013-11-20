@@ -25,7 +25,7 @@ public class CakeDefenceHandler extends EventHandler {
 	
 	@Override
 	public void onPlayerDied(GamePlayer gP, PlayerDeathEvent event) {
-		cd.onPlayerDies(gP);
+		cd.onPlayerDies(gP, event);
 	}
 	
 	@Override
