@@ -77,6 +77,13 @@ public class StartInventoryPanel extends javax.swing.JPanel implements RewardCal
             singleItemMap.put(Table.ChestplateTable, sr.getChest());
             singleItemMap.put(Table.HelmetTable, sr.getHead());
             startInventory = sr.getStartInventory().getItems();
+            
+            //Update tables
+            updateTable(Table.BootsTable);
+            updateTable(Table.LeggingsTable);
+            updateTable(Table.ChestplateTable);
+            updateTable(Table.HelmetTable);
+            updateTable(Table.InventoryTable);
         }
     }
     
