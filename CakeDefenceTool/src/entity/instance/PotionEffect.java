@@ -44,7 +44,7 @@ public class PotionEffect implements Serializable {
     }
     
     public boolean isInfinite() {
-        return (level == -1);
+        return (length == -1);
     }
 
     @Override
