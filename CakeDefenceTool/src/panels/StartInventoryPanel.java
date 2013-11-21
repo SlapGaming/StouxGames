@@ -537,7 +537,7 @@ public class StartInventoryPanel extends javax.swing.JPanel implements RewardCal
         } else {
             singleItemMap.remove(clickedTable);
         }
-        updateTable(currentTable);
+        updateTable(clickedTable);
     }
     
     private void tableMouseClicked(Table clickedTable, MouseEvent evt) {
