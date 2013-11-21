@@ -387,7 +387,7 @@ public class SonicLeaderboard {
 						"FROM `sonicleaderboard` " +
 						between +
 						"ORDER BY `sonicleaderboard`.`finish` ASC " +
-						"LIMIT 0, 10;"
+						"LIMIT 0, 1000;"
 					);
 					if (monthly) { //If monthly set the parameter
 						prep.setDate(1, startDateSQL);
@@ -412,6 +412,9 @@ public class SonicLeaderboard {
 						}
 						sendMessage(p, rank + ". " + ChatColor.YELLOW + foundPlayer + ChatColor.WHITE + " - Time: " + ChatColor.YELLOW + getTimeString(0, leaderboardRS.getLong(2))); //Send time
 						rank++;
+						if (rank > 10) {
+							break;
+						}
 					}
 					
 					if (rank == 1) {
