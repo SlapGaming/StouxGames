@@ -23,7 +23,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.earth2me.essentials.Essentials;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 /**
@@ -35,8 +34,6 @@ public class StouxGames extends JavaPlugin {
 	//External
 	//WorldGuard
 	private WorldGuardPlugin worldguard;
-	//Essentials
-	private Essentials essentials;
 	//TabAPI & TagAPI
 	//Stuff
 	
@@ -85,10 +82,6 @@ public class StouxGames extends JavaPlugin {
 		
 		//Initialize Externals
 		new TabControl();
-		Plugin foundEss = pm.getPlugin("Essentials"); //Find essentials
-		if (foundEss != null && foundEss instanceof Essentials) {
-			essentials = (Essentials) foundEss;
-		}
 		
 		//Initialize the games
 		initializeGames();
@@ -164,11 +157,11 @@ public class StouxGames extends JavaPlugin {
 	}
 	
 	/**
-	 * Get the essentials plugin
-	 * @return the plugin
+	 * Get the pressurepad handler
+	 * @return the handler
 	 */
-	public Essentials getEssentials() {
-		return essentials;
+	public PressurePadHandler getPressurePadHandler() {
+		return pressurePadHandler;
 	}
 
 }

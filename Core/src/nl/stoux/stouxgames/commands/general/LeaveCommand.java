@@ -4,6 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import nl.stoux.stouxgames.commands.AbstractCommand;
+import nl.stoux.stouxgames.commands.exception.CommandException;
 import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.util._;
 
@@ -20,35 +21,19 @@ public class LeaveCommand extends AbstractCommand {
 	}
 
 	@Override
-	public boolean handle() {
-		voidHandle();
-		return true;
-	}
-	
-	private void voidHandle() {
-		if (!_.isAPlayer(sender)) { //Check if actual player
-			_.badMsg(sender, "You need to be ingame to do that!");
-			return;
-		}
-		
-		Player p = (Player) sender; //Cast to player
-		
-		if (p.getLocation().getWorld() != _.getWorld()) { //Check if correct world
-			_.badMsg(sender, "This can only be done in the games world!");
-			return;
-		}
-		
+	public boolean handle() throws CommandException {
+		checkPermission("leave");
+		Player p = getPlayer();
+		checkWorld(p.getLocation());
 		GamePlayer gP = getGamePlayer();
-		if (gP == null) {
-			_.badMsg(sender, "You can only do this command while in a game.");
-			return;
-		}
 		
 		//Leave the game the player is in
 		gP.getGame().playerQuit(gP);
 		
 		//Remove from main list
 		_.getPlayerController().removePlayer(gP.getName());
+		return true;
 	}
-
+	
+	
 }

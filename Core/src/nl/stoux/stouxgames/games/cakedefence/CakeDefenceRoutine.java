@@ -314,7 +314,9 @@ public class CakeDefenceRoutine {
 				potionEffects = new HashSet<>();
 				for (PotionEffect effect : mob.getPotionEffects()) {
 					PotionEffectType type = PotionEffectType.getByName(effect.getType().toString());
-					potionEffects.add(type.createEffect(effect.isInfinite() ? Integer.MAX_VALUE : effect.getLength(), effect.getLevel()));
+					long length = effect.getLength() * 20;
+					if (length > Integer.MAX_VALUE || effect.getLength() == -1) length = Integer.MAX_VALUE;
+					potionEffects.add(type.createEffect((int) length, effect.getLevel()));
 				}
 			}
 		}

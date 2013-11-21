@@ -1,10 +1,13 @@
 package nl.stoux.stouxgames.commands.main;
 
+import nl.stoux.stouxgames.StouxGames;
 import nl.stoux.stouxgames.commands.AbstractCommand;
+import nl.stoux.stouxgames.commands.exception.CommandException;
+import nl.stoux.stouxgames.commands.exception.Message;
+import nl.stoux.stouxgames.commands.exception.UsageException;
 import nl.stoux.stouxgames.games.AbstractGame;
 import nl.stoux.stouxgames.games.GameController;
 import nl.stoux.stouxgames.games.GameMode;
-import nl.stoux.stouxgames.games.cakedefence.CakeDefence;
 import nl.stoux.stouxgames.util._;
 
 import org.bukkit.ChatColor;
@@ -20,8 +23,10 @@ public class StouxGamesCommand extends AbstractCommand {
 	}
 
 	@Override
-	public boolean handle() {
-		if (args.length == 0) { //Info command
+	public boolean handle() throws CommandException {
+		
+		if (args.length == 0 || args[0].toLowerCase().equals("info")) { //Info command
+			checkPermission("info");
 			String[] msgs = new String[] {
 				header + "Mini-games plugin made by " + ChatColor.GREEN + "Stoux",
 				header + "Current version: " + _.getPlugin().getDescription().getVersion() + ChatColor.GRAY + " (Beta)",
@@ -40,40 +45,41 @@ public class StouxGamesCommand extends AbstractCommand {
 			return true;
 		}
 		
+		
 		switch (args[0].toLowerCase()) {
+		
 		case "reload":
-			if (!_.testPermission(sender, "reload")) {
-				_.noPermission(sender);
-				return true;
-			}
-			
+			checkPermission("reload");
+			StouxGames p = _.getPlugin();
+			p.onDisable();
+			p.onEnable();
+			sender.sendMessage(header + "Plugin reloaded!");
 			break;
+			
 		case "reloadgame": case "restartgame":
-			if (!_.testPermission(sender, "reloadgame")) {
-				_.noPermission(sender);
-				return true;
-			}
-			if (args.length < 2) {
-				_.badMsg(sender, "Usage: /stouxgames reloadgame [GameMode]");
-				return true;
-			}
+			checkPermission("reloadgame");
+			if (args.length != 2) throw new UsageException("/stouxgames reloadgame [GameMode]");
 			GameMode gm;
 			try {
 				gm = GameMode.valueOf(args[1]);
 			} catch (Exception e) {
-				_.badMsg(sender, "Not a valid gamemode.");
-				return true;
+				throw new CommandException(args[1] + " is not a valid gamemode.");
 			}
 			AbstractGame game = _.getGameController().getGame(gm);
-			if (game == null) {
-				_.badMsg(sender, "This game is not loaded. So can't reload lol.");
-				return true;
-			}
+			if (game == null) throw new CommandException(Message.gameNotRunning);
 			game.reloadGame();
+			sender.sendMessage(header + "Game reloaded!");
 			break;
-		case "mobsleft":
-			CakeDefence cd = (CakeDefence) _.getGameController().getGame(GameMode.CD);
-			cd.getAliveMobs(null);
+			
+		case "reloadpads": case "reloadpad":
+			checkPermission("reloadpads");
+			_.getPlugin().getPressurePadHandler().reset();
+			sender.sendMessage(header + "Pads reloaded!");
+			break;
+			
+		default:
+			throw new UsageException("/stouxgames <info>");
+			
 		}
 		return true;
 	}

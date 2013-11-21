@@ -1,6 +1,8 @@
 package nl.stoux.stouxgames.commands;
 
 
+import nl.stoux.stouxgames.commands.cd.CakeDefenceCommand;
+import nl.stoux.stouxgames.commands.exception.CommandException;
 import nl.stoux.stouxgames.commands.general.LeaveCommand;
 import nl.stoux.stouxgames.commands.main.StouxGamesCommand;
 import nl.stoux.stouxgames.commands.sonic.SonicCommand;
@@ -18,8 +20,10 @@ public class CommandHandler {
 		
 		switch (command) {
 		case "stouxgames": 
-		case "games":
 			commandObj = new StouxGamesCommand(sender, args);
+			break;
+		case "cakedefence":
+			commandObj = new CakeDefenceCommand(sender, args);
 			break;
 		
 		//General
@@ -40,9 +44,13 @@ public class CommandHandler {
 		
 		}
 		if (commandObj != null) {
-			boolean handled = commandObj.handle();
-			if (!handled) {
-				_.badMsg(sender, cmd.getUsage());
+			try {
+				boolean handled = commandObj.handle();
+				if (!handled) {
+					_.badMsg(sender, cmd.getUsage());
+				}
+			} catch (CommandException e) {
+				sender.sendMessage(e.getMessage());
 			}
 		}
 		return true;

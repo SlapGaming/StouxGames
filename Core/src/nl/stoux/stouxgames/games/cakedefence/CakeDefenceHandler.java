@@ -4,6 +4,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -63,6 +64,11 @@ public class CakeDefenceHandler extends EventHandler {
 	@Override
 	public void onInventoryEvent(GamePlayer gP, InventoryOpenEvent event) {
 		return;
+	}
+	
+	@Override
+	public void onPlayerMove(GamePlayer gP, PlayerMoveEvent event) {
+		cd.onPlayerMove(gP, event);
 	}
 
 }

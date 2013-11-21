@@ -1,5 +1,5 @@
 name: StouxGames
-version: 0.2.0
+version: 0.2.1
 description: Stoux Mini-Games plugin
 # Lots and lots of credit to Naithantu
 # Helping me out, teaching me stuff about bukkit
@@ -13,13 +13,17 @@ website: www.stoux.nl/StouxGames
 main: nl.stoux.stouxgames.StouxGames
 database: false
 depend: [WorldGuard, WorldEdit]
-softdepend: [TabAPI, TagAPI, Essentials]
+softdepend: [TabAPI, TagAPI]
 
 commands:
   stouxgames:
     description: The main games command
     aliases: [games]
     usage: /stouxgames
+  cakedefence:
+    description: The CakeDefence command
+    aliases: [cd]
+    usage: /cakedefence
   gleave:
     description: Leave a game
     usage: /gleave

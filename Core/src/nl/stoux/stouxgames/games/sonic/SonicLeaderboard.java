@@ -202,6 +202,12 @@ public class SonicLeaderboard {
 			@Override
 			public void run() {
 				try {
+					if (con.isClosed()) {
+						if (!connectWithSQL()) {
+							throw new SQLException("Failed to connect with SQL.");
+						}
+					}
+					
 					PreparedStatement prep = con.prepareStatement( //Prepare a new Statement
 						"INSERT INTO `mcecon`.`sonicleaderboard` " +
 						"(`player`, `finish_timestamp`, `finish`, " +
@@ -259,6 +265,12 @@ public class SonicLeaderboard {
 			@Override
 			public void run() {
 				try {
+					if (con.isClosed()) {
+						if (!connectWithSQL()) {
+							throw new SQLException("Failed to connect with SQL.");
+						}
+					}
+					
 					String[] messages = new String[7];
 					ResultSet allScoresRS = con.createStatement().executeQuery( //Gather all scores
 						"SELECT `player`, `finish`, `checkpoint1`, `checkpoint2`, `checkpoint3`, `checkpoint4`, `checkpoint5` " +
@@ -269,13 +281,13 @@ public class SonicLeaderboard {
 					HashSet<String> foundPlayers = new HashSet<>();
 					int rank = 0;
 					while (allScoresRS.next()) { //Loop thru scores
-						String foundPlayer = allScoresRS.getString(1); //Get the player
+						String foundPlayer = allScoresRS.getString(1).toLowerCase(); //Get the player
 						if (foundPlayers.contains(foundPlayer)) { //If player already found
 							continue; //Skip
 						}
 						foundPlayers.add(foundPlayer);
 						rank++;
-						if (foundPlayer.equals(playername)) { //Requested player found
+						if (foundPlayer.equals(playername.toLowerCase())) { //Requested player found
 							playerFound = true; //Send player's time
 							messages[0] = playername + "'s All-Time High Score = " + ChatColor.GREEN + getTimeString(0, allScoresRS.getLong(2)) + ChatColor.WHITE + " | Ranked " + ChatColor.GREEN + "#" + rank;
 							messages[1] = checkpointString(1, allScoresRS.getLong(3));
@@ -306,13 +318,13 @@ public class SonicLeaderboard {
 					playerFound = false; rank = 0; foundPlayers.clear();
 					ResultSet monthlyRS = prep.executeQuery();
 					while (monthlyRS.next()) { //Loop thru all monthly scores
-						String monthlyPlayer = monthlyRS.getString(1);
+						String monthlyPlayer = monthlyRS.getString(1).toLowerCase();
 						if (foundPlayers.contains(monthlyPlayer)) { //Player already found
 							continue;
 						}
 						foundPlayers.add(monthlyPlayer);
 						rank++;
-						if (monthlyPlayer.equals(playername)) { //If the player
+						if (monthlyPlayer.equals(playername.toLowerCase())) { //If the player
 							playerFound = true;
 							messages[6] = playername + "'s Monthly (" + monthString + ") High Score = " + ChatColor.GREEN + getTimeString(0, monthlyRS.getLong(2)) + ChatColor.WHITE + " | Ranked " + ChatColor.GREEN + "#" + rank;
 							break;
@@ -360,6 +372,12 @@ public class SonicLeaderboard {
 			public void run() {
 				HashSet<String> foundPlayers = new HashSet<>();
 				try {
+					if (con.isClosed()) {
+						if (!connectWithSQL()) {
+							throw new SQLException("Failed to connect with SQL.");
+						}
+					}
+					
 					String between = "";
 					if (monthly) { //If monthly add the between SQL statement
 						between = "WHERE `finish_timestamp` BETWEEN ? AND ? ";

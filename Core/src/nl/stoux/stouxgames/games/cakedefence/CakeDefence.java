@@ -18,6 +18,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
@@ -52,6 +53,7 @@ public class CakeDefence extends AbstractGame {
 	private Location spawnLocation;
 	private Location spectateLocation;
 	private ProtectedRegion lavaRegion; //Dies region
+	private int topLavaRegion;
 	private ProtectedRegion mainRegion;
 		
 	//Music Block
@@ -65,6 +67,7 @@ public class CakeDefence extends AbstractGame {
 	
 	//Routines
 	private ArrayList<File> routines;
+	private String forceRoutine;
 
 	public CakeDefence() {
 		super(GameMode.CD);
@@ -101,6 +104,9 @@ public class CakeDefence extends AbstractGame {
 			return;
 		}
 		
+		//Get top level from Lava region
+		topLavaRegion = lavaRegion.getMaximumPoint().getBlockY();
+		
 		//Set Spawn Yaw
 		spawnLocation.setYaw(0F);
 		
@@ -133,7 +139,7 @@ public class CakeDefence extends AbstractGame {
 		openSpawnersSize = 0;
 				
 		//Get routines
-		getRoutines();
+		findRoutines();
 		if (routines.size() < 1) {
 			_.log(Level.SEVERE, "No CakeDefence routines found!");
 			return;
@@ -231,7 +237,7 @@ public class CakeDefence extends AbstractGame {
 	/**
 	 * Load all the routines
 	 */
-	private void getRoutines() {
+	public void findRoutines() {
 		String sep = System.getProperty("file.separator");
 		routines = new ArrayList<>();
 		File f = new File (_.getPlugin().getDataFolder().getAbsolutePath() + sep + "cakedefence");
@@ -254,6 +260,22 @@ public class CakeDefence extends AbstractGame {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * Get all the found routines
+	 * @return the list with all the files
+	 */
+	public ArrayList<File> getRoutines() {
+		return routines;
+	}
+	
+	/**
+	 * Set the forced routine
+	 * @param name the name of the routine (with .stx)
+	 */
+	public void setForcedRoutine(String name) {
+		forceRoutine = name;
 	}
 
 	/*
@@ -279,19 +301,37 @@ public class CakeDefence extends AbstractGame {
 			
 			@Override
 			public void run() {
-				int nrOfPlayers = countPlayers(new PlayerState[]{ //Count willing players
-						PlayerState.lobby, PlayerState.lobbyPlayer,
-						PlayerState.gameover, PlayerState.playing,
-						PlayerState.joining
-				});
-				if (nrOfPlayers < 2) { //If less then 5 players -> Cancel
-					broadcastToPlayers("Not enough players to start the game.. There need to be atleast 5!");
-					state = GameState.lobby;
-				} else { //Start the game
-					startGame();
-				}
+				countDownEnded(true);
 			}
 		}, minutes * 60 * 20);
+	}
+	
+	/**
+	 * Actions taken after the countdown has ended
+	 * @param check check for correct number of players
+	 * @return game started
+	 */
+	public boolean countDownEnded(boolean check) {
+		if (!check) {
+			if (lobbyCountdownTask instanceof BukkitTask) {
+				lobbyCountdownTask.cancel();
+			}
+		}
+		int nrOfPlayers = countPlayers(new PlayerState[]{ //Count willing players
+				PlayerState.lobby, PlayerState.lobbyPlayer,
+				PlayerState.gameover, PlayerState.playing,
+				PlayerState.joining
+		});
+		if (nrOfPlayers < 5 && check) { //If less then 5 players -> Cancel
+			broadcastToPlayers("Not enough players to start the game.. There need to be atleast 5!");
+			state = GameState.lobby;
+		} else { //Start the game
+			if (nrOfPlayers > 0) {
+				startGame();
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -308,7 +348,23 @@ public class CakeDefence extends AbstractGame {
 				broadcastToPlayers("Selecting Routine...");
 				CakeDefenceRoutine selectedRoutine = null;
 				
-				File f = routines.get(_.getRandomInt(routines.size()));
+				File f = null; 
+				boolean routineFound = false;
+				
+				if (forceRoutine != null) {
+					for (File listedFile : routines) {
+						if (listedFile.getName().toLowerCase().equals(forceRoutine.toLowerCase())) {
+							f = listedFile;
+							routineFound = true;
+							forceRoutine = null;
+							break;
+						}
+					}
+				}
+				
+				if (!routineFound) {
+					f = routines.get(_.getRandomInt(routines.size()));
+				}
 				
 				try (FileInputStream fis = new FileInputStream(f); ObjectInputStream ois = new ObjectInputStream(fis);) {
 					selectedRoutine = new CakeDefenceRoutine((Routine) ois.readObject());
@@ -385,13 +441,16 @@ public class CakeDefence extends AbstractGame {
 			gP.resetPlayer();
 		}
 		
-		for (Entity e : _.getWorld().getEntities()) {
-			if (!(e instanceof Player)) {
-				Location loc = e.getLocation();
-				if (mainRegion.contains(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) {
-					e.remove();
+		if (_.getPlugin().isEnabled()) {
+			_T.runLater_Sync(new Runnable() {
+				
+				@Override
+				public void run() {
+					clearArena();
 				}
-			}
+			}, 10);
+		} else {
+			clearArena();
 		}
 		
 		if (winners != null) {
@@ -400,15 +459,28 @@ public class CakeDefence extends AbstractGame {
 			_.broadcast(gm, "Oh no! The players have lost the cake, the mobs win!");
 		}
 		
-		if (willingPlayers > 1) { //Check if enough players for another round 
-			lobbyCountdown(1);
-		} else {
-			broadcastToPlayers("There are not enough players.. You need " + (5 - willingPlayers) + " more player(s).");
-			state = GameState.lobby;
+		if (_.getPlugin().isEnabled()) {
+			if (willingPlayers > 4) { //Check if enough players for another round 
+				lobbyCountdown(2);
+			} else {
+				broadcastToPlayers("There are not enough players.. You need " + (5 - willingPlayers) + " more player(s).");
+				state = GameState.lobby;
+			}
 		}
 		
 		//Set game to null
 		game = null;
+	}
+	
+	private void clearArena() {
+		for (Entity e : _.getWorld().getEntities()) {
+			if (!(e instanceof Player)) {
+				Location loc = e.getLocation();
+				if (mainRegion.contains(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) {
+					e.remove();
+				}
+			}
+		}
 	}
 	
 	/**
@@ -426,6 +498,7 @@ public class CakeDefence extends AbstractGame {
 	/**
 	 * A player has died
 	 * @param gP The player
+	 * @param event The death event
 	 */
 	public void onPlayerDies(GamePlayer gP, PlayerDeathEvent event) {
 		//Check if correct state
@@ -443,11 +516,37 @@ public class CakeDefence extends AbstractGame {
 		
 		//Shut down if no players left
 		int players = countPlayers(new PlayerState[]{PlayerState.playing});
-		if (players < 1) game.shutdown();
-		else {
+		if (players < 1) {
+			event.getDrops().clear();
+			game.shutdown();
+		} else {
 			//TODO There belongs something here but what
 		}
+	}
+	
+	/**
+	 * A player moved
+	 * @param gP The player
+	 * @param event The move event
+	 */
+	public void onPlayerMove(GamePlayer gP, PlayerMoveEvent event) {
+		if (state != GameState.playing) return;
+		if (gP.getState() != PlayerState.playing) return;
+		if (game == null) return;
 		
+		Location loc = event.getTo();
+		Player p = gP.getPlayer();
+		
+		if (!_.hasMoved(event.getFrom(), loc)) return; //Check if moved
+		
+		if (loc.getY() < topLavaRegion) {
+			if (lavaRegion.contains(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) { //Is dead
+				p.damage(p.getMaxHealth());
+				if (p.getHealth() > 0) {
+					p.setHealth(0);
+				}
+			}
+		}
 	}
 	
 	/*
@@ -624,8 +723,8 @@ public class CakeDefence extends AbstractGame {
 		
 		if (state == GameState.lobby) {
 			int willingPlayers = countPlayers(new PlayerState[] {PlayerState.lobby, PlayerState.lobbyPlayer, PlayerState.joining, PlayerState.gameover, PlayerState.playing});
-			if (willingPlayers > 1) {
-				lobbyCountdown(1);
+			if (willingPlayers > 4) {
+				lobbyCountdown(2);
 			} else {
 				broadcastToPlayers("You need " + (5 - willingPlayers) + " more player(s) for the game to start!");
 			}
