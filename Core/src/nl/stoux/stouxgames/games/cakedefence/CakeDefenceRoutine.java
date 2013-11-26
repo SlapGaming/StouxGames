@@ -256,18 +256,11 @@ public class CakeDefenceRoutine {
 			PlayerInventory pi = p.getInventory();
 			giveReward(endReward, pi); //Give standard reward
 			
-			int random = _.getRandomInt(20); //5% for Good  --  15% for Mediocre  --  30% for Bad
-			switch (random) {
-			case 10: 
-				giveReward(goodReward, pi);
-				break;
-			case 0: case 5: case 15:
-				giveReward(mediocreReward, pi);
-				break;
-			case 1: case 4: case 7: case 12: case 13: case 18:
-				giveReward(badReward, pi);
-				break;
-			}
+			int random = _.getRandomInt(20); //10% for Good  --  25% for Mediocre  --  45% for Bad
+			if 		(random >= 0 && random <= 1) 	giveReward(goodReward, 		pi);
+			else if	(random >= 2 && random <= 6) 	giveReward(mediocreReward, 	pi);
+			else if (random >= 7 && random <= 15) 	giveReward(badReward, 		pi);
+			
 		}
 		
 		/**
