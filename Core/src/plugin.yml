@@ -1,5 +1,5 @@
 name: StouxGames
-version: 0.2.1
+version: 0.2.2
 description: Stoux Mini-Games plugin
 # Lots and lots of credit to Naithantu
 # Helping me out, teaching me stuff about bukkit
@@ -31,3 +31,6 @@ commands:
      description: Warps you to the sonic world to race.
   sonic:
     description: Main command for the sonic racetrack.
+  tntrun:
+    description: The TNTRun command
+    usage: /tntrun

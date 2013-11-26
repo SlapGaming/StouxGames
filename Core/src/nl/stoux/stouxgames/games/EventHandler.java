@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.util._;
@@ -122,6 +123,15 @@ public class EventHandler {
 	 */
 	public void onPlayerRespawn(GamePlayer gP, PlayerRespawnEvent event) {
 		event.setRespawnLocation(game.getLobby());
+	}
+	
+	/**
+	 * A player toggles sneaking
+	 * @param gP The player
+	 * @param event The event
+	 */
+	public void onPlayerSneak(GamePlayer gP, PlayerToggleSneakEvent event) {
+		return;
 	}
 
 }

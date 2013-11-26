@@ -35,6 +35,7 @@ public class TNTRun extends AbstractGame {
 	
 	//Countdown tasks
 	private BukkitTask startCountdown;
+	private BukkitTask lobbyCountdown;
 	
 	//Floors have TNT
 	private boolean hasTNT;
@@ -114,6 +115,9 @@ public class TNTRun extends AbstractGame {
 		if (startCountdown instanceof BukkitTask) { //Cancel the task
 			startCountdown.cancel();
 		}
+		if (lobbyCountdown instanceof BukkitTask) { //Cancel
+			lobbyCountdown.cancel();
+		}
 		if (blockRemover instanceof BukkitTask) { //Cancel the task
 			blockRemover.cancel();
 		}
@@ -185,7 +189,7 @@ public class TNTRun extends AbstractGame {
 				spectateMessage(gP);
 			}
 		}
-		_T.runLater_Sync(new Runnable() {
+		lobbyCountdown = _T.runLater_Sync(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -204,6 +208,16 @@ public class TNTRun extends AbstractGame {
 			}
 		}, minutes * 60 * 20);
 		
+	}
+	
+	/**
+	 * Force start the game
+	 */
+	public void forceStartGame() {
+		if (lobbyCountdown instanceof BukkitTask) {
+			lobbyCountdown.cancel();
+		}
+		startGame();
 	}
 	
 	private void startGame() {
@@ -425,7 +439,7 @@ public class TNTRun extends AbstractGame {
 	public void onMove(GamePlayer gP, PlayerMoveEvent event) {
 		if (state != GameState.playing || gP.getState() != PlayerState.playing) { //Check if the game is running & the player in question is playing
 			return;
-		}
+		}	
 		
 		blockRemoverTask.playerMoved(gP.getPlayer());
 		

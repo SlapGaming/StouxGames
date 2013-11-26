@@ -26,6 +26,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 public class EventListener implements Listener {
 
@@ -175,6 +176,13 @@ public class EventListener implements Listener {
 			}
 		}
 		
+	}
+	
+	@EventHandler
+	public void onPlayerSneak(PlayerToggleSneakEvent event) {
+		GamePlayer gP = getGamePlayer(event.getPlayer());
+		if (gP == null) return;
+		gP.getGame().Events.onPlayerSneak(gP, event);
 	}
 	
 	

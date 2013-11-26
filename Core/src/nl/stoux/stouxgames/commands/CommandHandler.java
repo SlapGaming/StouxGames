@@ -7,6 +7,7 @@ import nl.stoux.stouxgames.commands.general.LeaveCommand;
 import nl.stoux.stouxgames.commands.main.StouxGamesCommand;
 import nl.stoux.stouxgames.commands.sonic.SonicCommand;
 import nl.stoux.stouxgames.commands.sonic.WarpsonicCommand;
+import nl.stoux.stouxgames.commands.tntrun.TntRunCommand;
 import nl.stoux.stouxgames.util._;
 
 import org.bukkit.command.Command;
@@ -19,27 +20,22 @@ public class CommandHandler {
 		AbstractCommand commandObj = null; //The Abstract command
 		
 		switch (command) {
-		case "stouxgames": 
-			commandObj = new StouxGamesCommand(sender, args);
-			break;
-		case "cakedefence":
-			commandObj = new CakeDefenceCommand(sender, args);
-			break;
-		
 		//General
-		case "leave":
-		case "gleave": commandObj = new LeaveCommand(sender, args); 	break;
+		case "stouxgames":	commandObj = new StouxGamesCommand(sender, args);		break;
+		case "gleave": 		commandObj = new LeaveCommand(sender, args); 			break;
 		
 		//Sonic
-		case "warpsonic": commandObj = new WarpsonicCommand(sender, args); break;
-		case "sonic": commandObj = new SonicCommand(sender, args); break;
+		case "warpsonic": 	commandObj = new WarpsonicCommand(sender, args); 		break;
+		case "sonic": 		commandObj = new SonicCommand(sender, args); 			break;
 		
 		//Spleef
 		
 		
+		//TNT Run
+		case "tntrun": 		commandObj = new TntRunCommand(sender, args);			break;
 		
-		
-		
+		//Cake Defence
+		case "cakedefence":	commandObj = new CakeDefenceCommand(sender, args);		break;
 		
 		
 		}
