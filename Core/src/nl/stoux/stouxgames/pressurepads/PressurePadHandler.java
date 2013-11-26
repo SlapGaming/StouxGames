@@ -3,16 +3,17 @@ package nl.stoux.stouxgames.pressurepads;
 import java.util.HashMap;
 import java.util.logging.Level;
 
+import nl.stoux.stouxgames.games.GameController;
+import nl.stoux.stouxgames.games.GameMode;
+import nl.stoux.stouxgames.storage.YamlStorage;
+import nl.stoux.stouxgames.util._;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-
-import nl.stoux.stouxgames.games.GameController;
-import nl.stoux.stouxgames.games.GameMode;
-import nl.stoux.stouxgames.storage.YamlStorage;
-import nl.stoux.stouxgames.util._;
+import org.bukkit.util.Vector;
 
 public class PressurePadHandler {
 
@@ -22,6 +23,7 @@ public class PressurePadHandler {
 	
 	//Plate locations
 	private HashMap<Location, PressurePadType> pads;
+	private HashMap<PressurePadType, Vector> spartas;
 	
 	//Games
 	private GameController gameController;
@@ -31,6 +33,7 @@ public class PressurePadHandler {
 		yaml = new YamlStorage("Pads");
 		config = yaml.getConfig();
 		pads = new HashMap<>();
+		spartas = new HashMap<>();
 		checkPads();
 	}
 	
@@ -38,8 +41,10 @@ public class PressurePadHandler {
 	 * Reset the class (reload the YML, check for pads)
 	 */
 	public void reset() {
-		yaml.reloadConfig();
+		yaml = new YamlStorage("Pads");
+		config = yaml.getConfig();
 		pads = new HashMap<>();
+		spartas = new HashMap<>();
 		checkPads();
 	}
 	
@@ -56,7 +61,8 @@ public class PressurePadHandler {
 			_.badMsg(p, "You are already in a game, huh? Return to your game.");
 			return;
 		}
-		switch (pads.get(loc)) {
+		PressurePadType type = pads.get(loc);
+		switch (type) {
 		case CDJoin:
 			gameController.getGame(GameMode.CD).playerJoins(p);
 			break;
@@ -81,11 +87,19 @@ public class PressurePadHandler {
 		case TNTRunSpectate:
 			gameController.getGame(GameMode.TNTRun).playerJoinsSpectate(p);
 			break;
-		case VirusJoin:
+		case HungerGamesJoin:
 			notSupported(p);
 			break;
-		case VirusSpectate:
+		case HungerGamesSpectate:
 			notSupported(p);
+			break;
+	    
+		//Sparta pads
+		case SpartaCD: case SpartaHungerGames: case SpartaParkour: case SpartaSonic: case SpartaSpleef: case SpartaTNTRun:
+			Vector v = spartas.get(type);
+			if (v != null) {
+				p.setVelocity(v);
+			}
 			break;
 		default:
 			break;
@@ -102,16 +116,33 @@ public class PressurePadHandler {
 	private void checkPads() {
 		//Loop all values
 		for (PressurePadType type : PressurePadType.values()) {
-			getPlateLocation(type.toString().toLowerCase(), type);
+			if (type.isSparta()) {
+				getSpartaLocation(type);
+			} else {
+				getPlateLocation(type);
+			}
 		}
 	}
-	
+		
 	/**
 	 * Get the location of a plate
 	 * @param pad
 	 * @return The location
 	 */
-	private void getPlateLocation(String pad, PressurePadType type) {
+	private void getPlateLocation(PressurePadType type) {
+		String pad = type.toString().toLowerCase();
+		if (!config.contains(pad)) return; //Check if in config
+		
+		findPressurePlate(pad, type); //Get the plate
+	}
+	
+	/**
+	 * Find the pressure plate
+	 * @param pad String to config
+	 * @param type type of pad
+	 * @return block location or null
+	 */
+	private Location findPressurePlate(String pad, PressurePadType type) {
 		//Get the coords
 		int x = config.getInt(pad + ".x");
 		int y = config.getInt(pad + ".y");
@@ -122,9 +153,49 @@ public class PressurePadHandler {
 		
 		if (b.getType() == Material.STONE_PLATE || b.getType() == Material.WOOD_PLATE) { //Check if a pressure plate
 			pads.put(b.getLocation(), type); //Put the location in the map
+			return b.getLocation();
 		} else {
 			_.log(Level.WARNING, "A pressure pad has not been found: " + type.toString()); //Failed to find pressureplate
+			return null;
 		}
+	}
+	
+	private void getSpartaLocation(PressurePadType type) {
+		String pad = type.toString().toLowerCase();
+		if (!config.contains(pad + ".pad") || !config.contains(pad + ".spartato")) return; //Check if in config
+		
+		Location from = findPressurePlate(pad + ".pad", type);
+		
+		if (from == null) return;
+		
+		//Get the coords
+		int x = config.getInt(pad + ".spartato.x");
+		int y = config.getInt(pad + ".spartato.y");
+		int z = config.getInt(pad + ".spartato.z");
+		if (x == 0 && y == 0 && z == 0) return;
+		
+		
+		//Get the block
+		Block b = _.getWorld().getBlockAt(new Location(_.getWorld(), x, y, z));
+		Location to = b.getLocation();
+		
+		//Calculate vector
+		double dX = from.getX() - to.getBlockX();
+		double dY = from.getY() - to.getY();
+		double dZ = from.getZ() - to.getZ();
+		
+		double yaw = Math.atan2(dZ, dX);
+		double pitch = Math.atan2(Math.sqrt(dZ * dZ + dX * dX), dY) + Math.PI;
+		
+		double vX = Math.sin(pitch) * Math.cos(yaw);
+		double vY = Math.sin(pitch) * Math.sin(yaw);
+		double vZ = Math.cos(pitch);
+		
+		Vector vector = new Vector(vX, vZ, vY);
+		
+		int multiplier = config.getInt(pad + ".spartato.multi");
+		
+		spartas.put(type, vector.multiply(multiplier));
 	}
 	
 	/**
@@ -132,16 +203,45 @@ public class PressurePadHandler {
 	 * @author Leon
 	 */
 	public enum PressurePadType {
+		//Sparta's
+		SpartaSpleef(true),
+		SpartaSonic(true),
+		SpartaCD(true),
+		SpartaParkour(true),
+		SpartaTNTRun(true),
+		SpartaHungerGames(true),
+		
+		
+		//Arena's
 		SpleefJoin,
 		SpleefSpectate,
+		
 		SonicJoin,
+		
 		CDJoin,
 		CDSpectate,
+		
 		ParkourJoin,
+		
 		TNTRunJoin,
 		TNTRunSpectate,
-		VirusJoin,
-		VirusSpectate;
+		
+		HungerGamesJoin,
+		HungerGamesSpectate;
+		
+		private boolean sparta;
+		private PressurePadType() {
+			sparta = false;
+		}
+		private PressurePadType(boolean sparta) {
+			this.sparta = sparta;
+		}
+		
+		public boolean isSparta() {
+			return sparta;
+		}
+		
+		
 	}
 	
 	
