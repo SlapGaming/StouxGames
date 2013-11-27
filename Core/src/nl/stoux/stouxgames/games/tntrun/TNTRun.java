@@ -65,6 +65,9 @@ public class TNTRun extends AbstractGame {
 	private BukkitTask blockRemover;
 	private TNTRunBlockTask blockRemoverTask;
 	
+	//Forced mode
+	private String forcedMode;
+	
 	public TNTRun() {
 		super(GameMode.TNTRun);
 		yaml = new YamlStorage("TNTRun");
@@ -220,6 +223,14 @@ public class TNTRun extends AbstractGame {
 		startGame();
 	}
 	
+	/**
+	 * Set the mode for the next round
+	 * @param mode The mode
+	 */
+	public void forceMode(String mode) {
+		forcedMode = mode;
+	}
+	
 	private void startGame() {
 		_.broadcast(gm, "A new game of TNT Run is starting!");
 		state = GameState.starting;
@@ -232,6 +243,7 @@ public class TNTRun extends AbstractGame {
 			private int seconds = 3;
 			private boolean hardcore = false;
 			private boolean speed = false;
+			private boolean confusion = false;
 			private HashSet<Block> startBlocks;
 			
 			@Override
@@ -254,20 +266,49 @@ public class TNTRun extends AbstractGame {
 					broadcastToPlayers("TNT Run is starting in 2 seconds!");
 					break;
 				case 1:
-					int randomInt = _.getRandomInt(20);
-					switch (randomInt) {
-					case 8:
-						broadcastToPlayers("TNT Run is starting in 1 seconds! " + ChatColor.DARK_RED + "Hardcore mode activated...");
-						hardcore = true;
-						speed = true;
-						break;
-					case 1: case 9: case 15:
-						broadcastToPlayers("TNT Run is starting in 1 seconds! " + ChatColor.AQUA + "Speed modus activated!");
-						speed = true;
-						break;
-					default:
-						broadcastToPlayers("TNT Run is starting in 1 seconds!");
+					String extra = "";
+					if (forcedMode != null) {
+						switch (forcedMode) {
+						case "ultra":
+							extra = ChatColor.DARK_RED + "ULTRA hardcore mode. Prepare to lose.";
+							speed = true;
+							hardcore = true;
+							confusion = true;
+							break;
+						case "confused":
+							extra = ChatColor.DARK_AQUA + "Confused mode activated?";
+							confusion = true;
+							break;
+						case "hardcore":
+							extra = ChatColor.RED + "Hardcore mode activated...";
+							hardcore = true;
+							speed = true;
+							break;
+						case "speed":
+							extra = ChatColor.AQUA + "Speed modus activated!";
+							speed = true;
+							break;
+						}
+						forcedMode = null;
+					} else {
+						int randomInt = _.getRandomInt(30);
+						switch (randomInt) {
+						case 18:
+							extra = ChatColor.DARK_AQUA + "Confused mode activated?";
+							confusion = true;
+							break;
+						case 8: case 4:
+							extra = ChatColor.RED + "Hardcore mode activated...";
+							hardcore = true;
+							speed = true;
+							break;
+						case 1: case 9: case 15: case 20: case 24:
+							extra = ChatColor.AQUA + "Speed modus activated!";
+							speed = true;
+							break;
+						}
 					}
+					broadcastToPlayers("TNT Run is starting in 1 second! " + (extra.equals("") ? "" : extra));
 					break;
 				case 0:
 					blockRemoverTask = new TNTRunBlockTask(tntRun, hasTNT);
@@ -276,12 +317,14 @@ public class TNTRun extends AbstractGame {
 					for (Block b : startBlocks) {
 						blockRemoverTask.addBlock(b);
 					}
-					if (hardcore || speed) { //If hardcore mode give everyone blindness
-						for (GamePlayer gP : getPlayers()) {
-							if (gP.getState() == PlayerState.playing) {
-								Player gPP = gP.getPlayer();
+					for (GamePlayer gP : getPlayers()) {
+						if (gP.getState() == PlayerState.playing) {
+							Player gPP = gP.getPlayer();
+							blockRemoverTask.playerMoved(gPP); //Invoke a moved
+							if (hardcore || speed) { //Give potions
 								if (hardcore) _.giveInfinitePotion(gPP, PotionEffectType.BLINDNESS);
 								if (speed) _.giveInfinitePotion(gPP, PotionEffectType.SPEED, 2);
+								if (confusion) _.giveInfinitePotion(gPP, PotionEffectType.CONFUSION);
 							}
 						}
 					}

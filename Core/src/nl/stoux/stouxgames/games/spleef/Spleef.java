@@ -347,7 +347,7 @@ public class Spleef extends AbstractGame {
 				case 1:
 					if (_.getRandomInt(5) == 4 || forcedPotionEffect != null) { //20% Chance
 						potionBoost = true;
-						broadcastToPlayers("Spleef is starting in 1 second! Bonus potion activating..");
+						broadcastToPlayers("Spleef is starting in 1 second! " + ChatColor.AQUA + "Bonus potion activating..");
 					} else {
 						broadcastToPlayers("Spleef is starting in 1 second!");
 					}

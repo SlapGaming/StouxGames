@@ -28,8 +28,18 @@ public class TntRunCommand extends AbstractCommand {
 		if (tnt == null) throw new CommandException(Message.gameNotRunning);
 		
 		switch (args[0].toLowerCase()) {
-		case "forcepotion": case "forcep": case "forcemode": case "forcem": 
-			
+		case "forcepotion": case "forcep": case "forcemode": case "forcem":
+			checkPermission("tntrun.forcemode");
+			String usage = "/tntrun forcemode <Normal | Speed | Confused | Hardcore | ULTRA>";
+			if (args.length != 2) throw new UsageException(usage);
+			switch (args[1].toLowerCase()) {
+			case "normal": case "speed": case "confused": case "ultra": case "hardcore":
+				tnt.forceMode(args[1].toLowerCase());
+				break;
+			case "confusion":
+				tnt.forceMode("confused");
+				break;
+			}
 			break;
 			
 		case "forcestart": case "forces": case "start":
