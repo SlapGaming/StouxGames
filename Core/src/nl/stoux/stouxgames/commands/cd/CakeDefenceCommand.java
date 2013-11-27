@@ -70,12 +70,8 @@ public class CakeDefenceCommand extends AbstractCommand {
 			if (!cd.countDownEnded(false)) throw new CommandException("Failed to force start. No players in the game?");
 			break;
 			
-			
-			
-			
-		
-		
-		
+		default:
+			throw new UsageException("/cakedefence");
 		}
 		
 		return true;

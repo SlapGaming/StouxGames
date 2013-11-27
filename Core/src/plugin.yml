@@ -31,6 +31,10 @@ commands:
      description: Warps you to the sonic world to race.
   sonic:
     description: Main command for the sonic racetrack.
+    usage: /sonic <time [player] | leaderboard [monthly]>
   tntrun:
     description: The TNTRun command
     usage: /tntrun
+  spleef:
+    description: The Spleef command
+    usage: /spleef

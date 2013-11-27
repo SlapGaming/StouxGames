@@ -31,7 +31,8 @@ public class TntRunCommand extends AbstractCommand {
 		case "forcepotion": case "forcep": case "forcemode": case "forcem": 
 			
 			break;
-		case "forcestart": case "forces":
+			
+		case "forcestart": case "forces": case "start":
 			checkPermission("tntrun.forcestart");
 			if (tnt.getGameState() == GameState.lobby || tnt.getGameState() == GameState.lobbyJoining) {
 				tnt.forceStartGame();
@@ -39,6 +40,9 @@ public class TntRunCommand extends AbstractCommand {
 				throw new UsageException("TNT Run cannot be forced start from this game state.");
 			}
 			break;
+			
+		default:
+			throw new UsageException("/tntrun");
 		}
 		
 		return true;

@@ -7,6 +7,7 @@ import nl.stoux.stouxgames.commands.general.LeaveCommand;
 import nl.stoux.stouxgames.commands.main.StouxGamesCommand;
 import nl.stoux.stouxgames.commands.sonic.SonicCommand;
 import nl.stoux.stouxgames.commands.sonic.WarpsonicCommand;
+import nl.stoux.stouxgames.commands.spleef.SpleefCommand;
 import nl.stoux.stouxgames.commands.tntrun.TntRunCommand;
 import nl.stoux.stouxgames.util._;
 
@@ -29,7 +30,7 @@ public class CommandHandler {
 		case "sonic": 		commandObj = new SonicCommand(sender, args); 			break;
 		
 		//Spleef
-		
+		case "spleef":		commandObj = new SpleefCommand(sender, args);			break;
 		
 		//TNT Run
 		case "tntrun": 		commandObj = new TntRunCommand(sender, args);			break;

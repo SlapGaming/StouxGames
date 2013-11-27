@@ -48,6 +48,11 @@ public class Spleef extends AbstractGame {
 		
 	//Tasks
 	private BukkitTask startingTask;
+	private BukkitTask countdownTask;
+	
+	//Forced
+	private Material forcedFloorType;
+	private PotionEffectType forcedPotionEffect;
 	
 	public Spleef() {
 		super(GameMode.Spleef);
@@ -120,7 +125,7 @@ public class Spleef extends AbstractGame {
 				PotionEffectType.BLINDNESS,
 				PotionEffectType.CONFUSION,
 				PotionEffectType.SPEED,
-				PotionEffectType.SLOW
+				PotionEffectType.SLOW,
 		};
 		
 		enabled = true;
@@ -254,7 +259,7 @@ public class Spleef extends AbstractGame {
 				spectateMessage(gP);
 			}
 		}
-		_T.runLater_Sync(new Runnable() {
+		countdownTask = _T.runLater_Sync(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -276,13 +281,45 @@ public class Spleef extends AbstractGame {
 	}
 	
 	/**
+	 * Force a potion effect in the next round
+	 * @param type The type of potion
+	 */
+	public void forcePotionEffect(PotionEffectType type) {
+		forcedPotionEffect = type;
+	}
+	
+	/**
+	 * Force a material to be the floor
+	 * @param m The material
+	 */
+	public void forceFloorType(Material m) {
+		forcedFloorType = m;
+	}
+	
+	/**
+	 * Force the game to start
+	 */
+	public void forceStartGame() {
+		if (countdownTask instanceof BukkitTask) {
+			countdownTask.cancel();
+		}
+		startGame();
+	}
+	
+	
+	/**
 	 * Start the game
 	 */
 	public void startGame() {
 		_.broadcast(gm, "A new game of Spleef is starting!");
 		state = GameState.starting;		
 		
-		playground.setRegionToMaterial(floorTypes[_.getRandomInt(floorTypes.length)]); //Set the floor
+		if (forcedFloorType != null) {
+			playground.setRegionToMaterial(forcedFloorType);
+			forcedFloorType = null;
+		} else {
+			playground.setRegionToMaterial(floorTypes[_.getRandomInt(floorTypes.length)]); //Set the floor
+		}
 		
 		startingTask = _T.runTimer_Sync(new Runnable() {
 			
@@ -308,21 +345,27 @@ public class Spleef extends AbstractGame {
 					broadcastToPlayers("Spleef is starting in 2 seconds!");
 					break;
 				case 1:
-					if (_.getRandomInt(5) == 4) { //20% Chance
+					if (_.getRandomInt(5) == 4 || forcedPotionEffect != null) { //20% Chance
 						potionBoost = true;
-						broadcastToPlayers("Spleef is starting in 1 second! Bonus potion activated!");
+						broadcastToPlayers("Spleef is starting in 1 second! Bonus potion activating..");
 					} else {
 						broadcastToPlayers("Spleef is starting in 1 second!");
 					}
 					break;
 				case 0:
 					if (potionBoost) { //20% Chance
-						PotionEffectType potionType = potionTypes[_.getRandomInt(potionTypes.length)];
+						PotionEffectType potionType;
+						if (forcedPotionEffect != null) {
+							potionType = forcedPotionEffect;
+						} else {
+							potionType = potionTypes[_.getRandomInt(potionTypes.length)];
+						}
 						for (GamePlayer gP : players.values()) {
 							if (gP.getState() == PlayerState.playing) {
 								_.giveInfinitePotion(gP.getPlayer(), potionType);
 							}
 						}
+						forcedPotionEffect = null;
 					}
 					broadcastToPlayers("Spleef has started! Goodluck!");
 					state = GameState.playing;
@@ -450,22 +493,16 @@ public class Spleef extends AbstractGame {
 	 */
 	public void onPlayerMove(GamePlayer gP, PlayerMoveEvent event) {
 		if (gP.getState() != PlayerState.playing) return; //Not playing
-		if (state != GameState.playing && state != GameState.starting) return; //Stop if not playing
+		if (state != GameState.playing) return; //Stop if not playing
 		
 		//Check if actual move (Not just mouse moving)
 		Location from = event.getFrom();
 		Location to = event.getTo();
 		
 		if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) { //Has moved
-			if (state == GameState.playing) {
-				Block movedTo = to.getBlock();
-				if (groundRegion.contains(movedTo.getX(), movedTo.getY(), movedTo.getZ())) {
-					playerDied(gP); //if in ground region -> Dies
-				}
-			} else {
-				if (from.getX() != to.getX() || from.getZ() != to.getZ()) {
-					event.setCancelled(true);
-				}
+			Block movedTo = to.getBlock();
+			if (groundRegion.contains(movedTo.getX(), movedTo.getY(), movedTo.getZ())) {
+				playerDied(gP); //if in ground region -> Dies
 			}
 		}
 	}
