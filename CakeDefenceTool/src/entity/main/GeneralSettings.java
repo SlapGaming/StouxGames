@@ -12,6 +12,8 @@ import java.io.Serializable;
  */
 public class GeneralSettings implements Serializable {
     
+    private static final long serialVersionUID = 7211943569649641172L;
+    
     private String routinename;
     private String author;
     

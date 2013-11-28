@@ -16,6 +16,8 @@ import java.util.Map;
  */
 public class Item implements Serializable {
 
+    private static final long serialVersionUID = 4080595211072787051L;
+    
     private ItemEnum itemType; //The type of Item
     private int amount; //Amount of this item
     private int durability;

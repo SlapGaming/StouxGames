@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class MobTypeCollection implements Serializable {
     
+    private static final long serialVersionUID = -6992506764367924758L;
+    
     public static MobType[] ZOMBIES = new MobType[]{
         MobType.BABY_ZOMBIE, MobType.ZOMBIE, MobType.ZOMBIE_VILLAGER, MobType.BABY_ZOMBIE_PIGMAN, MobType.ZOMBIE_PIGMAN
     };

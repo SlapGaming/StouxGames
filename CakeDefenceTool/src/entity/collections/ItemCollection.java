@@ -15,6 +15,8 @@ import java.util.ArrayList;
  */
 public class ItemCollection implements Serializable {
     
+    private static final long serialVersionUID = 4533801952212419690L;
+    
     //Per armor piece
     final public static ItemEnum[] BOOTS = getTypeCollection(ItemType.Boots);
     final public static ItemEnum[] LEGGINGS = getTypeCollection(ItemType.Legs);

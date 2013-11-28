@@ -14,6 +14,8 @@ import java.util.ArrayList;
  */
 public class RewardCollection implements Serializable {
     
+    private static final long serialVersionUID = 2562797475018348412L;
+    
     private ArrayList<Item> items;
     
     public RewardCollection() {

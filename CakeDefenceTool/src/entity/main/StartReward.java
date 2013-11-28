@@ -14,6 +14,8 @@ import java.io.Serializable;
  */
 public class StartReward implements Serializable {
     
+    private static final long serialVersionUID = 876382336533960142L;
+    
     private Item boots;
     private Item legs;
     private Item chest;

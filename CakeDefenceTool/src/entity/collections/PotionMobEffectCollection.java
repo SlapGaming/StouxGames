@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class PotionMobEffectCollection implements Serializable {
     
+    private static final long serialVersionUID = 7320966325887460384L;
+    
     public static PotionEffectType[] MOBONLY = new PotionEffectType[] {
         PotionEffectType.SPEED, PotionEffectType.SLOW, PotionEffectType.INCREASE_DAMAGE, PotionEffectType.JUMP,
         PotionEffectType.REGENERATION, PotionEffectType.DAMAGE_RESISTANCE,

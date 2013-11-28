@@ -14,6 +14,8 @@ import java.util.HashSet;
  */
 public class Round implements Serializable {
     
+    private static final long serialVersionUID = -9194509654974120243L;
+    
     //Mobs
     private HashSet<Mob> mobs;
     

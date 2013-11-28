@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class PotionItemCollection implements Serializable {
     
+    private static final long serialVersionUID = 8580292307686485630L;
+    
     public static PotionItemType[] REGEN = new PotionItemType[] {
         PotionItemType.REGEN, PotionItemType.REGEN_2, PotionItemType.REGEN_2_EXTENDED, PotionItemType.REGEN_EXTENDED
     };

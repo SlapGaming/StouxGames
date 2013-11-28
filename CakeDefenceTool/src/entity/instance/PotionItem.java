@@ -14,6 +14,8 @@ import java.io.Serializable;
  */
 public class PotionItem extends Item implements Serializable {
     
+    private static final long serialVersionUID = 6464081121938169628L;
+    
     private PotionItemType type;
     private boolean splash;
 

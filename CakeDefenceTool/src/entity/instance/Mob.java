@@ -14,6 +14,8 @@ import java.util.Collection;
  */
 public class Mob implements Serializable {
     
+    private static final long serialVersionUID = -2294959494181998853L;
+    
     private MobType type; //Type
     private int amount; //Number of mobs
     private Collection<PotionEffect> potionEffects;

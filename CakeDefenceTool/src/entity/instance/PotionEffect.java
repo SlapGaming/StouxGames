@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class PotionEffect implements Serializable {
     
+    private static final long serialVersionUID = -8683664637655764135L;
+    
     private PotionEffectType type;
     private int level;
     private int length;

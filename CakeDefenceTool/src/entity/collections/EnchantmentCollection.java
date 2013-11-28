@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public class EnchantmentCollection implements Serializable {
     
+    private static final long serialVersionUID = 2791275686087159590L;
+    
     public static EnchantmentType[] ALL = EnchantmentType.values();
     public static EnchantmentType[] MELEE = new EnchantmentType[] {
         EnchantmentType.DAMAGE_ALL,

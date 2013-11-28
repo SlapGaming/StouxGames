@@ -14,6 +14,8 @@ import java.util.ArrayList;
  */
 public class Routine implements Serializable {
     
+    private static final long serialVersionUID = 6422160254393652059L;
+    
     private GeneralSettings settings;
     private StartReward startReward;
     private ArrayList<Round> rounds;
