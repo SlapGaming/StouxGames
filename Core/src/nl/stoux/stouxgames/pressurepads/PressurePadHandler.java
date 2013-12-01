@@ -95,7 +95,7 @@ public class PressurePadHandler {
 			break;
 	    
 		//Sparta pads
-		case SpartaCD: case SpartaHungerGames: case SpartaParkour: case SpartaSonic: case SpartaSpleef: case SpartaTNTRun:
+		case SpartaCD: case SpartaHungerGames: case SpartaParkour: case SpartaSonic: case SpartaSpleef: case SpartaTNTRun: case ChristmasSparta:
 			Vector v = spartas.get(type);
 			if (v != null) {
 				p.setVelocity(v);
@@ -167,14 +167,11 @@ public class PressurePadHandler {
 		Location from = findPressurePlate(pad + ".pad", type);
 		
 		if (from == null) return;
-		
-		//Get the coords
 		int x = config.getInt(pad + ".spartato.x");
 		int y = config.getInt(pad + ".spartato.y");
 		int z = config.getInt(pad + ".spartato.z");
 		if (x == 0 && y == 0 && z == 0) return;
-		
-		
+				
 		//Get the block
 		Block b = _.getWorld().getBlockAt(new Location(_.getWorld(), x, y, z));
 		Location to = b.getLocation();
@@ -186,14 +183,13 @@ public class PressurePadHandler {
 		
 		double yaw = Math.atan2(dZ, dX);
 		double pitch = Math.atan2(Math.sqrt(dZ * dZ + dX * dX), dY) + Math.PI;
-		
+				
+		int multiplier = config.getInt(pad + ".spartato.multi");
 		double vX = Math.sin(pitch) * Math.cos(yaw);
 		double vY = Math.sin(pitch) * Math.sin(yaw);
 		double vZ = Math.cos(pitch);
 		
 		Vector vector = new Vector(vX, vZ, vY);
-		
-		int multiplier = config.getInt(pad + ".spartato.multi");
 		
 		spartas.put(type, vector.multiply(multiplier));
 	}
@@ -211,6 +207,8 @@ public class PressurePadHandler {
 		SpartaTNTRun(true),
 		SpartaHungerGames(true),
 		
+		//Special sparta
+		ChristmasSparta(true),
 		
 		//Arena's
 		SpleefJoin,

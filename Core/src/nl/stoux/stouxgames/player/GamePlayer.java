@@ -1,5 +1,6 @@
 package nl.stoux.stouxgames.player;
 
+import nl.stoux.stouxgames.external.TabControl;
 import nl.stoux.stouxgames.games.AbstractGame;
 import nl.stoux.stouxgames.util._;
 
@@ -80,8 +81,10 @@ public class GamePlayer {
 		resetPlayer();
 		
 		//Clear the player's tab
-		TabAPI.clearTab(p);
-		TabAPI.updatePlayer(p);
+		if (TabControl.isEnabled()) {
+			TabAPI.clearTab(p);
+			TabAPI.updatePlayer(p);
+		}
 		
 		//Teleport player
 		p.teleport(_.getWorld().getSpawnLocation());

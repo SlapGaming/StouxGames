@@ -35,9 +35,9 @@ public class StouxGamesCommand extends AbstractCommand {
 			GameController gameController = _.getGameController();
 			boolean first = true;
 			for (AbstractGame game : gameController.getGames()) { //Loop thru games
-				if (!first) msgs[2] = msgs[2] + ", ";
+				if (!first) msgs[2] += ChatColor.WHITE + ", ";
 				else first = false;
-				msgs[2] = msgs[2] + game.getGamemode().getName() + ChatColor.GRAY + " (" + game.getPlayers().size() + " players)" + ChatColor.WHITE; //Add all available games to the list 
+				msgs[2] += game.getGamemode().getName() + ChatColor.GRAY + " (" + game.getPlayers().size() + " players)"; //Add all available games to the list 
 			}
 			for (String msg : msgs) { //Send messages
 				sender.sendMessage(msg);

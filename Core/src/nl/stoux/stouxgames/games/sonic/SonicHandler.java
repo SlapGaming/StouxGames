@@ -38,9 +38,12 @@ public class SonicHandler extends EventHandler {
 			@Override
 			public void run() {
 				if (!p.isOnline()) return; //Check if still online
+				if (p.isDead()) return; //Check if actually alive..
 				ItemStack boots = p.getInventory().getBoots(); //Get boots
-				if (boots.getType() == Material.LEATHER_BOOTS) { //Check if leather boots
-					boots.setDurability((short)0);
+				if (boots != null) {
+					if (boots.getType() == Material.LEATHER_BOOTS) { //Check if leather boots
+						boots.setDurability((short)0);
+					}
 				}
 			}
 		}, 1);
