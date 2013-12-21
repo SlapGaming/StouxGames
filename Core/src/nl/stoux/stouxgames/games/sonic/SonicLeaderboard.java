@@ -1,6 +1,5 @@
 package nl.stoux.stouxgames.games.sonic;
 
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,22 +15,19 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import nl.stoux.stouxgames.external.SQLClass;
 import nl.stoux.stouxgames.games.GameMode;
 import nl.stoux.stouxgames.games.sonic.SonicPlayer.SonicRun;
 import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.util._;
 import nl.stoux.stouxgames.util._T;
 
-public class SonicLeaderboard {
+public class SonicLeaderboard extends SQLClass {
 
 	//Command hashset
 	private HashSet<String> doingCommand;
-	
-	//SQL Related
-	private Connection con;
-	
+		
 	//Dates
-	private SimpleDateFormat timeFormat;
 	private SimpleDateFormat monthFormat;
 	private Date startDate;
 	private java.sql.Date startDateSQL;
@@ -44,7 +40,6 @@ public class SonicLeaderboard {
 	
 	public SonicLeaderboard(Sonic sonic) {
 		this.sonic = sonic;
-		timeFormat = new SimpleDateFormat("mm:ss:SS");
 		monthFormat = new SimpleDateFormat("MM-yyyy");
 		doingCommand = new HashSet<>();
 		monthFormat();
@@ -74,18 +69,6 @@ public class SonicLeaderboard {
 		}
 	}
 	
-	
-	/**
-	 * Get a String of the passed time. Format: [Minutes]:[Seconds]:[Milliseconds]
-	 * @param startTime The starting time
-	 * @param endTime The end time
-	 * @return The string
-	 */
-	public String getTimeString(long startTime, long endTime) {
-		return timeFormat.format(new Date(endTime - startTime));
-	}
-	
-	
 	/**
 	 * Send a player a [Sonic] message
 	 * @param p The player
@@ -105,7 +88,7 @@ public class SonicLeaderboard {
 	 * @return The string
 	 */
 	private String checkpointString(int cp, long time) {
-		return "Checkpoint " + ChatColor.GRAY + String.valueOf(cp) + ChatColor.WHITE + " = " + ChatColor.GRAY + getTimeString(0, time) + ChatColor.WHITE;
+		return "Checkpoint " + ChatColor.GRAY + String.valueOf(cp) + ChatColor.WHITE + " = " + ChatColor.GRAY + _.getGameController().getTimeString(0, time) + ChatColor.WHITE;
 	}
 	
 	/**
@@ -139,14 +122,8 @@ public class SonicLeaderboard {
 	 */
 	public boolean checkConnection() {
 		try {
-			if (con.isClosed()) {
-				_T.run_ASync(new Runnable() {
-					@Override
-					public void run() {
-						connectWithSQL();
-					}
-				});
-				return false;
+			if (con.isClosed() || !isAlive) {
+				return connect();
 			}
 			return true;
 		} catch (SQLException e) {
@@ -160,7 +137,7 @@ public class SonicLeaderboard {
 	 * Create the table if it doesn't exist yet.
 	 * @return Succes
 	 */
-	public boolean connectWithSQL() {
+	public boolean connect() {
 		try {
 			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mcecon","mecon", "B9eCusTa"); //Connect
 			Statement tableStatement = con.createStatement(); //Create new statement to create the table
@@ -179,10 +156,14 @@ public class SonicLeaderboard {
 					"  `jump4` int(10) NOT NULL," +
 					"  `jump5` int(10) NOT NULL," +
 					"  PRIMARY KEY (`player`,`finish_timestamp`),  KEY `finish` (`finish`)" +
-					") ENGINE=InnoDB DEFAULT CHARSET=latin1;");			
+					") ENGINE=InnoDB DEFAULT CHARSET=latin1;");		
+			isAlive = true;
+			keepAlive = true;
 			return true;
 		} catch (SQLException e) {
 			_.log(Level.SEVERE, sonic.getGamemode(), "Failed to connect with leaderboards. SQLException: "+ e.getMessage());
+			isAlive = false;
+			keepAlive = false;
 			return false;
 		}
 	}
@@ -202,8 +183,8 @@ public class SonicLeaderboard {
 			@Override
 			public void run() {
 				try {
-					if (con.isClosed()) {
-						if (!connectWithSQL()) {
+					if (con.isClosed() || !isAlive) {
+						if (!connect()) {
 							throw new SQLException("Failed to connect with SQL.");
 						}
 					}
@@ -265,8 +246,8 @@ public class SonicLeaderboard {
 			@Override
 			public void run() {
 				try {
-					if (con.isClosed()) {
-						if (!connectWithSQL()) {
+					if (con.isClosed() || !isAlive) {
+						if (!connect()) {
 							throw new SQLException("Failed to connect with SQL.");
 						}
 					}
@@ -289,7 +270,7 @@ public class SonicLeaderboard {
 						rank++;
 						if (foundPlayer.equals(playername.toLowerCase())) { //Requested player found
 							playerFound = true; //Send player's time
-							messages[0] = playername + "'s All-Time High Score = " + ChatColor.GREEN + getTimeString(0, allScoresRS.getLong(2)) + ChatColor.WHITE + " | Ranked " + ChatColor.GREEN + "#" + rank;
+							messages[0] = playername + "'s All-Time High Score = " + ChatColor.GREEN + _.getGameController().getTimeString(0, allScoresRS.getLong(2)) + ChatColor.WHITE + " | Ranked " + ChatColor.GREEN + "#" + rank;
 							messages[1] = checkpointString(1, allScoresRS.getLong(3));
 							messages[2] = checkpointString(2, allScoresRS.getLong(4));
 							messages[3] = checkpointString(3, allScoresRS.getLong(5));
@@ -326,7 +307,7 @@ public class SonicLeaderboard {
 						rank++;
 						if (monthlyPlayer.equals(playername.toLowerCase())) { //If the player
 							playerFound = true;
-							messages[6] = playername + "'s Monthly (" + monthString + ") High Score = " + ChatColor.GREEN + getTimeString(0, monthlyRS.getLong(2)) + ChatColor.WHITE + " | Ranked " + ChatColor.GREEN + "#" + rank;
+							messages[6] = playername + "'s Monthly (" + monthString + ") High Score = " + ChatColor.GREEN + _.getGameController().getTimeString(0, monthlyRS.getLong(2)) + ChatColor.WHITE + " | Ranked " + ChatColor.GREEN + "#" + rank;
 							break;
 						}
 					}
@@ -372,8 +353,8 @@ public class SonicLeaderboard {
 			public void run() {
 				HashSet<String> foundPlayers = new HashSet<>();
 				try {
-					if (con.isClosed()) {
-						if (!connectWithSQL()) {
+					if (con.isClosed() || !isAlive) {
+						if (!connect()) {
 							throw new SQLException("Failed to connect with SQL.");
 						}
 					}
@@ -410,7 +391,7 @@ public class SonicLeaderboard {
 								sendMessage(p, ChatColor.YELLOW + " --- " + ChatColor.GOLD + "Sonic All-Time Leaderboard " + ChatColor.YELLOW + "---");
 							}
 						}
-						sendMessage(p, rank + ". " + ChatColor.YELLOW + foundPlayer + ChatColor.WHITE + " - Time: " + ChatColor.YELLOW + getTimeString(0, leaderboardRS.getLong(2))); //Send time
+						sendMessage(p, rank + ". " + ChatColor.YELLOW + foundPlayer + ChatColor.WHITE + " - Time: " + ChatColor.YELLOW + _.getGameController().getTimeString(0, leaderboardRS.getLong(2))); //Send time
 						rank++;
 						if (rank > 10) {
 							break;

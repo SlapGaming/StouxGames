@@ -1,0 +1,13 @@
+### StouxGames
+### Parkour Config
+
+# Lobby
+lobby: vector
+lobby-yaw: null
+
+# Pressure Pad + Sign
+# Sign Locations: W (west), E (east), N (north), S (South)
+pads:
+   1:
+      pad: vector
+      sign-location: W

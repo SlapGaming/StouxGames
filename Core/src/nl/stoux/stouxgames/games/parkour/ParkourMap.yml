@@ -1,0 +1,29 @@
+### StouxGames
+### ParkourMap Config
+
+# Parkour ID | DO NOT TOUCH.
+id: 0
+
+# General info
+name: null
+author: null
+
+# Allow players to continue on the last checkpoint they passed after leaving the game completely
+allowrestartoncheckpoint: false
+#if Allow on Restart -> Reset & Continue buttons
+continue-button: vector
+reset-button: vector
+
+# Main Locations
+lobby: vector
+lobby-yaw: null
+start: regionname
+end: regionname
+deathheight: -1
+
+# Checkpoints | Can be commented if there are no checkpoints
+checkpoints:
+   1:
+      restartlocation: vector
+      restartlocation-yaw: null
+      region: regionname

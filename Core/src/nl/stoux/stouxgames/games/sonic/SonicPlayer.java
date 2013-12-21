@@ -130,7 +130,7 @@ public class SonicPlayer extends GamePlayer {
 				end = System.currentTimeMillis();
 				racing = false;
 				sonic.getLeaderboard().saveSonicRun(sP, sonicRun);
-				sonic.broadcastToPlayers(name + " has finished racing in a time of " + sonic.getLeaderboard().getTimeString(start, end) + "!"); //Broadcast finishing time
+				sonic.broadcastToPlayers(name + " has finished racing in a time of " + _.getGameController().getTimeString(start, end) + "!"); //Broadcast finishing time
 				sonic.teleportToSonicLobby(sP);
 				return true;
 			} else {
@@ -148,7 +148,7 @@ public class SonicPlayer extends GamePlayer {
 		public boolean passedCheckpoint(int checkpoint) {
 			if (racing == true && (checkpoint - 1) == currentCheckpoint) { //Passed the previous one correct.
 				cpTimes[currentCheckpoint] = System.currentTimeMillis(); //Save the time
-				sonic.broadcastToPlayers(name + " has passed checkpoint " + checkpoint + " with a time of " + sonic.getLeaderboard().getTimeString(start, cpTimes[currentCheckpoint]) + "!"); //Broadcast
+				sonic.broadcastToPlayers(name + " has passed checkpoint " + checkpoint + " with a time of " + _.getGameController().getTimeString(start, cpTimes[currentCheckpoint]) + "!"); //Broadcast
 				currentCheckpoint = checkpoint;
 				return true;
 			} else {

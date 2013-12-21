@@ -9,7 +9,11 @@ public enum Message {
 	incorrectWorld("You need to be in the mini-games world to do that!"),
 	notInAGame("You need to be in a game to do that!"),
 	notInMinecraft("You need to be in-game to do that!"),
-	noPermission("You don't have permission to do this!");
+	noPermission("You don't have permission to do this!"),
+	
+	//Parkour
+	invalidMapID("This is not a valid map ID. Check out " + ChatColor.AQUA + "/parkour maps"),
+	notOnParkourMap("You aren't on a parkour map!");
 	
 	private String msg;
 	private Message(String msg) {

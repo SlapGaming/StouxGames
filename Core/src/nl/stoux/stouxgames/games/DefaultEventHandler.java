@@ -16,12 +16,12 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.util._;
 
-public class EventHandler {
+public class DefaultEventHandler {
 	
 	//The abstract game
 	private AbstractGame game;
 	
-	public EventHandler(AbstractGame game) {
+	public DefaultEventHandler(AbstractGame game) {
 		this.game = game;
 	}
 
@@ -76,7 +76,7 @@ public class EventHandler {
 	 * @param event The event
 	 */
 	public void onInventoryEvent(GamePlayer gP, InventoryOpenEvent event) {
-		event.setCancelled(true);
+		//event.setCancelled(true);
 	}
 	
 	/**

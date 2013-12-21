@@ -2,7 +2,6 @@ package nl.stoux.stouxgames.commands.tntrun;
 
 import nl.stoux.stouxgames.commands.AbstractCommand;
 import nl.stoux.stouxgames.commands.exception.CommandException;
-import nl.stoux.stouxgames.commands.exception.Message;
 import nl.stoux.stouxgames.commands.exception.UsageException;
 import nl.stoux.stouxgames.commands.main.StouxGamesCommand;
 import nl.stoux.stouxgames.games.GameMode;
@@ -25,7 +24,7 @@ public class TntRunCommand extends AbstractCommand {
 		}
 		
 		TNTRun tnt = (TNTRun) _.getGameController().getGame(GameMode.TNTRun);
-		if (tnt == null) throw new CommandException(Message.gameNotRunning);
+		isGameRunning(tnt);
 		
 		switch (args[0].toLowerCase()) {
 		case "forcepotion": case "forcep": case "forcemode": case "forcem":

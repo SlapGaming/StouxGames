@@ -7,11 +7,11 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 
-import nl.stoux.stouxgames.games.EventHandler;
+import nl.stoux.stouxgames.games.DefaultEventHandler;
 import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.util._T;
 
-public class SonicHandler extends EventHandler {
+public class SonicHandler extends DefaultEventHandler {
 
 	private Sonic sonic;
 	

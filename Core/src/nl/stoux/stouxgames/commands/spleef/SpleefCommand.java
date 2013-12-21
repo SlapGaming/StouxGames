@@ -2,7 +2,6 @@ package nl.stoux.stouxgames.commands.spleef;
 
 import nl.stoux.stouxgames.commands.AbstractCommand;
 import nl.stoux.stouxgames.commands.exception.CommandException;
-import nl.stoux.stouxgames.commands.exception.Message;
 import nl.stoux.stouxgames.commands.exception.UsageException;
 import nl.stoux.stouxgames.commands.main.StouxGamesCommand;
 import nl.stoux.stouxgames.games.GameMode;
@@ -29,7 +28,7 @@ public class SpleefCommand extends AbstractCommand {
 		}
 		
 		Spleef spleef = (Spleef) _.getGameController().getGame(GameMode.Spleef);
-		if (spleef == null) throw new CommandException(Message.gameNotRunning);
+		isGameRunning(spleef);
 		
 		switch (args[0].toLowerCase()) {
 		case "forcestart": case "forces": case "start":

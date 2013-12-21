@@ -18,7 +18,7 @@ import nl.stoux.stouxgames.util._;
 public abstract class AbstractGame {
 
 	//Event Handler
-	public EventHandler Events;
+	public DefaultEventHandler Events;
 	
 	//Setup info
 	protected YamlStorage yaml;
@@ -105,7 +105,7 @@ public abstract class AbstractGame {
 	 * Initialize the Event handler
 	 * @param handler the handler
 	 */
-	protected void initializeEventHandler(EventHandler handler) {
+	protected void initializeEventHandler(DefaultEventHandler handler) {
 		this.Events = handler;
 	}
 	

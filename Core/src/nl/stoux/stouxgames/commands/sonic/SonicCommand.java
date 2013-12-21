@@ -4,7 +4,6 @@ import nl.stoux.stouxgames.commands.AbstractCommand;
 import nl.stoux.stouxgames.commands.exception.CommandException;
 import nl.stoux.stouxgames.commands.exception.Message;
 import nl.stoux.stouxgames.commands.exception.UsageException;
-import nl.stoux.stouxgames.games.AbstractGame;
 import nl.stoux.stouxgames.games.GameMode;
 import nl.stoux.stouxgames.games.sonic.Sonic;
 import nl.stoux.stouxgames.util._;
@@ -14,23 +13,15 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class SonicCommand extends AbstractCommand {
-
-	//The sonic game
-	private static Sonic sonic;
 	
 	public SonicCommand(CommandSender sender, String[] args) {
 		super(sender, args);
-		if (sonic == null) {
-			AbstractGame game = _.getGameController().getGame(GameMode.Sonic);
-			if (game != null) {
-				sonic = (Sonic) game;
-			}
-		}
 	}
 
 	@Override
 	public boolean handle() throws CommandException {
-		if (sonic == null) throw new CommandException(Message.gameNotRunning);
+		Sonic sonic = (Sonic) _.getGameController().getGame(GameMode.Sonic);
+		isGameRunning(sonic);
 		
 		if (args.length == 0 || (args.length == 1 && args[0].toLowerCase().equals("help"))) { //Send help
 			checkPermission("sonic.help"); //Check for permission

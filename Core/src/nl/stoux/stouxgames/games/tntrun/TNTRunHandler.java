@@ -2,10 +2,10 @@ package nl.stoux.stouxgames.games.tntrun;
 
 import org.bukkit.event.player.PlayerMoveEvent;
 
-import nl.stoux.stouxgames.games.EventHandler;
+import nl.stoux.stouxgames.games.DefaultEventHandler;
 import nl.stoux.stouxgames.player.GamePlayer;
 
-public class TNTRunHandler extends EventHandler {
+public class TNTRunHandler extends DefaultEventHandler {
 
 	private TNTRun tntRun;
 	

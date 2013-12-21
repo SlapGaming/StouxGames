@@ -3,10 +3,12 @@ package nl.stoux.stouxgames;
 import java.util.logging.Level;
 
 import nl.stoux.stouxgames.commands.CommandHandler;
+import nl.stoux.stouxgames.external.SQLControl;
 import nl.stoux.stouxgames.external.TabControl;
 import nl.stoux.stouxgames.games.AbstractGame;
 import nl.stoux.stouxgames.games.GameController;
 import nl.stoux.stouxgames.games.cakedefence.CakeDefence;
+import nl.stoux.stouxgames.games.parkour.Parkour;
 import nl.stoux.stouxgames.games.sonic.Sonic;
 import nl.stoux.stouxgames.games.spleef.Spleef;
 import nl.stoux.stouxgames.games.tntrun.TNTRun;
@@ -31,11 +33,13 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
  */
 public class StouxGames extends JavaPlugin {
 	
-	//External
+	// --- External ---
 	//WorldGuard
 	private WorldGuardPlugin worldguard;
 	//TabAPI & TagAPI
-	//Stuff
+	
+	//SQL
+	private SQLControl sqlControl;
 	
 	//The game world
 	private World world;
@@ -44,6 +48,7 @@ public class StouxGames extends JavaPlugin {
 	private PlayerController playerController;
 	private GameController gameController;
 	private PressurePadHandler pressurePadHandler;
+	
 		
 	
 	/*
@@ -92,6 +97,9 @@ public class StouxGames extends JavaPlugin {
 		
 		//Register events
 		pm.registerEvents(new EventListener(playerController), this);
+		
+		//Start SQL Pinging
+		sqlControl.startPinging(10);
 	}
 	
 	@Override
@@ -112,13 +120,14 @@ public class StouxGames extends JavaPlugin {
 	private void setupControllers() {
 		playerController = new PlayerController();
 		gameController = new GameController();
+		sqlControl = new SQLControl();
 	}
 	
 	/**
 	 * Initialize the static UTIL classes
 	 */
 	private void initializeUtil() {
-		_.setupUtil(this, world, worldguard, gameController, playerController);
+		_.setupUtil(this, world, worldguard, gameController, playerController, sqlControl);
 	}
 	
 	/**
@@ -129,6 +138,7 @@ public class StouxGames extends JavaPlugin {
 		gameController.addGame(new TNTRun());
 		gameController.addGame(new Sonic());
 		gameController.addGame(new CakeDefence());
+		gameController.addGame(new Parkour());
 	}
 	
 	/**

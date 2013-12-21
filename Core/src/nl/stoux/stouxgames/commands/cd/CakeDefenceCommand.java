@@ -3,17 +3,16 @@ package nl.stoux.stouxgames.commands.cd;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.bukkit.command.CommandSender;
-
 import nl.stoux.stouxgames.commands.AbstractCommand;
 import nl.stoux.stouxgames.commands.exception.CommandException;
-import nl.stoux.stouxgames.commands.exception.Message;
 import nl.stoux.stouxgames.commands.exception.UsageException;
 import nl.stoux.stouxgames.commands.main.StouxGamesCommand;
 import nl.stoux.stouxgames.games.GameMode;
 import nl.stoux.stouxgames.games.GameState;
 import nl.stoux.stouxgames.games.cakedefence.CakeDefence;
 import nl.stoux.stouxgames.util._;
+
+import org.bukkit.command.CommandSender;
 
 public class CakeDefenceCommand extends AbstractCommand {
 
@@ -28,7 +27,7 @@ public class CakeDefenceCommand extends AbstractCommand {
 		}
 		
 		CakeDefence cd = (CakeDefence) _.getGameController().getGame(GameMode.CD);
-		if (cd == null) throw new CommandException(Message.gameNotRunning);
+		isGameRunning(cd);
 		
 		switch(args[0].toLowerCase()) {
 		case "reloadroutines": //Reload the routines

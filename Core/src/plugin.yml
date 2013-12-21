@@ -1,5 +1,5 @@
 name: StouxGames
-version: 0.2.2
+version: 0.3.0
 description: Stoux Mini-Games plugin
 # Lots and lots of credit to Naithantu
 # Helping me out, teaching me stuff about bukkit
@@ -38,3 +38,15 @@ commands:
   spleef:
     description: The Spleef command
     usage: /spleef
+  parkour:
+    description: The Parkour command
+  checkpoint:
+    description: Return to the last checkpoint you passed on a parkour map
+  leavemap:
+    description: Leave the current parkour map you're on
+  mapinfo:
+    description: Get the information about the map you're on
+  resetrun:
+    description: Reset the current parkour run you're doing.
+  runinfo:
+    description: Get the information about the current run you're doing.

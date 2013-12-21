@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.logging.Level;
 
 import nl.stoux.stouxgames.StouxGames;
+import nl.stoux.stouxgames.external.SQLControl;
 import nl.stoux.stouxgames.games.GameController;
 import nl.stoux.stouxgames.games.GameMode;
 import nl.stoux.stouxgames.player.PlayerController;
@@ -44,6 +45,7 @@ public class _ {
 	//Controllers
 	private static GameController gameController;
 	private static PlayerController playerController;
+	private static SQLControl sqlControl;
 	
 	//WorldGuardPlugin
 	private static WorldGuardPlugin worldguard;
@@ -59,12 +61,13 @@ public class _ {
 	 * @param worldGuardPlugin The WorldGuard plugin
 	 * @param pController The player controller
 	 */
-	public static void setupUtil(StouxGames stouxGames, World world, WorldGuardPlugin worldGuardPlugin, GameController gController, PlayerController pController) {
+	public static void setupUtil(StouxGames stouxGames, World world, WorldGuardPlugin worldGuardPlugin, GameController gController, PlayerController pController, SQLControl sqlController) {
 		plugin = stouxGames;
 		gamesWorld = world;
 		worldguard = worldGuardPlugin;
 		gameController = gController;
 		playerController = pController;
+		sqlControl = sqlController;
 		weWorld = new BukkitWorld(gamesWorld);
 		random = new Random();
 		_T.initialize(stouxGames); //Initialize the other Static Util class
@@ -238,6 +241,14 @@ public class _ {
 	 */
 	public static PlayerController getPlayerController() {
 		return playerController;
+	}
+	
+	/**
+	 * Get the SQL Class Controller
+	 * @return the controller
+	 */
+	public static SQLControl getSQLControl() {
+		return sqlControl;
 	}
 	
 	/**

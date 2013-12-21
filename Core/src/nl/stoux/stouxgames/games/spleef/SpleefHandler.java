@@ -3,10 +3,10 @@ package nl.stoux.stouxgames.games.spleef;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-import nl.stoux.stouxgames.games.EventHandler;
+import nl.stoux.stouxgames.games.DefaultEventHandler;
 import nl.stoux.stouxgames.player.GamePlayer;
 
-public class SpleefHandler extends EventHandler {
+public class SpleefHandler extends DefaultEventHandler {
 
 	private Spleef spleef;
 	

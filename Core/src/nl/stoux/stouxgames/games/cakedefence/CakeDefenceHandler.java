@@ -9,13 +9,13 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import nl.stoux.stouxgames.games.EventHandler;
+import nl.stoux.stouxgames.games.DefaultEventHandler;
 import nl.stoux.stouxgames.games.GameState;
 import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.player.PlayerState;
 import nl.stoux.stouxgames.util._T;
 
-public class CakeDefenceHandler extends EventHandler {
+public class CakeDefenceHandler extends DefaultEventHandler {
 
 	private CakeDefence cd;
 	

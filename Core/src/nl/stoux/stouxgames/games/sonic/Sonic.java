@@ -119,12 +119,14 @@ public class Sonic extends AbstractGame {
 		
 		//Create the leaderboard
 		leaderboard = new SonicLeaderboard(this);
-		boolean leaderboardConnected = leaderboard.connectWithSQL();
+		boolean leaderboardConnected = leaderboard.connect();
 		
 		if (!everythingFound || !leaderboardConnected) { //If something went wrong
 			_.log(Level.SEVERE, gm, "Disabled.");
 			return;
 		}
+		
+		_.getSQLControl().addSQLClass(leaderboard);
 		
 		enabled = true;
 		state = GameState.playing;
@@ -134,6 +136,7 @@ public class Sonic extends AbstractGame {
 	@Override
 	public void disableGame() {
 		removeAllPlayers();
+		_.getSQLControl().removeSQLClass(leaderboard);
 	}
 	
 	/**

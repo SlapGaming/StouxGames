@@ -5,6 +5,12 @@ import nl.stoux.stouxgames.commands.cd.CakeDefenceCommand;
 import nl.stoux.stouxgames.commands.exception.CommandException;
 import nl.stoux.stouxgames.commands.general.LeaveCommand;
 import nl.stoux.stouxgames.commands.main.StouxGamesCommand;
+import nl.stoux.stouxgames.commands.parkour.CheckpointCommand;
+import nl.stoux.stouxgames.commands.parkour.LeaveMapCommand;
+import nl.stoux.stouxgames.commands.parkour.MapInfoCommand;
+import nl.stoux.stouxgames.commands.parkour.ParkourCommand;
+import nl.stoux.stouxgames.commands.parkour.ResetRunCommand;
+import nl.stoux.stouxgames.commands.parkour.RunInfoCommand;
 import nl.stoux.stouxgames.commands.sonic.SonicCommand;
 import nl.stoux.stouxgames.commands.sonic.WarpsonicCommand;
 import nl.stoux.stouxgames.commands.spleef.SpleefCommand;
@@ -38,7 +44,19 @@ public class CommandHandler {
 		//Cake Defence
 		case "cakedefence":	commandObj = new CakeDefenceCommand(sender, args);		break;
 		
+		//Parkour
+		case "parkour":		commandObj = new ParkourCommand(sender, args);			break;
+		case "checkpoint":	commandObj = new CheckpointCommand(sender, args);		break;
+		case "leavemap":	commandObj = new LeaveMapCommand(sender, args);			break;
+		case "mapinfo":		commandObj = new MapInfoCommand(sender, args);			break;
+		case "resetrun":	commandObj = new ResetRunCommand(sender, args);			break;
+		case "runinfo":		commandObj = new RunInfoCommand(sender, args);			break;
 		
+		//Default
+		default:
+			_.badMsg(sender, "This command is not supported yet.");
+			
+			
 		}
 		if (commandObj != null) {
 			try {

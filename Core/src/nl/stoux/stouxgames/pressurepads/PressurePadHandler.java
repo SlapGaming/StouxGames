@@ -70,7 +70,7 @@ public class PressurePadHandler {
 			gameController.getGame(GameMode.CD).playerJoinsSpectate(p);
 			break;
 		case ParkourJoin:
-			notSupported(p);
+			gameController.getGame(GameMode.Parkour).playerJoins(p);
 			break;
 		case SonicJoin:
 			gameController.getGame(GameMode.Sonic).playerJoins(p);
