@@ -154,6 +154,7 @@ public class Parkour extends AbstractGame {
 		}
 		
 		ArrayList<Integer> padNumberList = new ArrayList<>(intToJoiner.keySet()); //Create new list
+		
 		Collections.sort(padNumberList); //Sort from Low -> High
 		int x = 0;
 		int listSize = foundMaps.size();
@@ -237,8 +238,11 @@ public class Parkour extends AbstractGame {
 	 */
 	private boolean generateMapsCommand() {
 		HashSet<ParkourMap> maps = new HashSet<>();
-		for (MapJoiner value : locToJoiner.values()) {
-			maps.add(value.getLinkedMap());
+		for (MapJoiner value : intToJoiner.values()) {
+			ParkourMap map = value.getLinkedMap();
+			if (map != null) {
+				maps.add(map);
+			}
 		}
 		
 		leaderboardMaps = sql.generateMapsCommand(maps);
