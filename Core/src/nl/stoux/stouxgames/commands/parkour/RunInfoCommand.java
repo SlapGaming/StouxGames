@@ -18,7 +18,7 @@ public class RunInfoCommand extends ParkourCommand {
 	
 	@Override
 	public boolean handle() throws CommandException {
-		ParkourPlayer pp = parkourCheck("mapinfo", true); //Standard checks
+		ParkourPlayer pp = parkourCheck("runinfo", true); //Standard checks
 		
 		ParkourRun run = pp.getRun();
 		ParkourMap map = pp.getCurrentMap();
