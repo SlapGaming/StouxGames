@@ -87,22 +87,7 @@ public class ParkourSQL extends SQLClass {
 			return false;
 		}
 	}
-	
-	/**
-	 * Try to disconnect
-	 */
-	public void disconnect() {
-		try {
-		if (con != null) {
-			if (!con.isClosed()) {
-				con.close();
-			}
-		}
-		} catch (SQLException e) {
-			_.log(Level.SEVERE, GameMode.Parkour, "Failed to disconnect? I don't even.");
-		}
-	}
-	
+		
 	/**
 	 * Check the current connection
 	 * If not connected try to connect (This doesn't happen A-Sync unless called in A-Sync thread).

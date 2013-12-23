@@ -136,7 +136,7 @@ public class Sonic extends AbstractGame {
 	@Override
 	public void disableGame() {
 		removeAllPlayers();
-		_.getSQLControl().removeSQLClass(leaderboard);
+		_.getSQLControl().removeSQLClass(leaderboard, true);
 	}
 	
 	/**

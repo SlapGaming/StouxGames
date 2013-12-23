@@ -25,7 +25,6 @@ public class ParkourCommand extends AbstractCommand {
 
 	public ParkourCommand(CommandSender sender, String[] args) {
 		super(sender, args);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override

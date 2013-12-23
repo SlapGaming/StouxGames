@@ -27,7 +27,15 @@ public class CheckpointCommand extends ParkourCommand {
 			if (nrOfCheckpoints == 0) {
 				_.msg(pp.getPlayer(), GameMode.Parkour, "This map doesn't have any checkpoints!");
 			} else {
-				_.msg(pp.getPlayer(), GameMode.Parkour, "You have passed " + ChatColor.GREEN + String.valueOf(run.getCurrentCheckpoint()) + "/" + nrOfCheckpoints + ChatColor.WHITE + " checkpoints.");
+				int currentCP = run.getCurrentCheckpoint();
+				if (currentCP > 0) {
+					run.getCurrentMap().getCheckpoint(currentCP).teleportPlayer(pp.getPlayer());
+					_.msg(pp.getPlayer(), GameMode.Parkour, "You have been teleported to checkpoint " + ChatColor.GREEN + String.valueOf(currentCP) + "/" + nrOfCheckpoints);
+				} else {
+					run.getCurrentMap().teleportToMapStart(pp.getPlayer());
+					run.reset();
+					_.msg(pp.getPlayer(), GameMode.Parkour, "You have been teleported back to the start! " + ChatColor.GRAY + "You didn't pass any of the " + nrOfCheckpoints + " checkpoints.");
+				}
 			}
 		} else { //Player hasn't started
 			_.msg(pp.getPlayer(), GameMode.Parkour, "You haven't started running yet!");

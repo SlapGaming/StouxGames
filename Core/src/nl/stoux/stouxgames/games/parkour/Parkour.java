@@ -58,8 +58,7 @@ public class Parkour extends AbstractGame {
 		
 		//Connect with SQL
 		if (sql != null) {
-			sql.disconnect();
-			_.getSQLControl().removeSQLClass(sql);
+			_.getSQLControl().removeSQLClass(sql, true);
 		}
 		sql = new ParkourSQL(this);
 		if (!sql.connect()) return;
@@ -199,8 +198,11 @@ public class Parkour extends AbstractGame {
 
 	@Override
 	public void disableGame() {
-		// TODO Auto-generated method stub
-
+		removeAllPlayers();
+		_.getSQLControl().removeSQLClass(sql, true);
+		sql = null;
+		enabled = false;
+		state = GameState.disabled;				
 	}
 	
 	/**
@@ -280,12 +282,18 @@ public class Parkour extends AbstractGame {
 		if (pp.getState() != PlayerState.playing || state != GameState.playing) {
 			return;
 		}
+		
+		Location to = event.getTo();
 
 		//Check if the player has actually moved
-		if (!_.hasMoved(event.getFrom(), event.getTo())) return;
+		if (!_.hasMoved(event.getFrom(), to)) return;
 		
-		if (pp.isOnParkourMap()) { //Should never be false
+		if (pp.isOnParkourMap()) {
 			pp.getCurrentMap().onPlayerMove(pp, event); //Let the map handle the rest
+		} else {
+			if (to.getY() < 44) {
+				pp.getPlayer().teleport(lobby);
+			}
 		}
 	}
 	
@@ -383,13 +391,43 @@ public class Parkour extends AbstractGame {
 		
 		public void setLinkedMap(ParkourMap linkedMap) {
 			this.linkedMap = linkedMap;
+			
+			String[] lines = new String[]{"",""};
+			String name = linkedMap.getName();
+			if (name.length() <= 13) {
+				lines[0] = name;
+			} else {
+				String[] split = name.split(" ");
+				if (split.length == 1) { //No spaces
+					lines[0] = name.substring(0, 12) + "-";
+					lines[1] = name.substring(12);
+				} else if (split.length == 2) { //1 Space
+					lines[0] = split[0];
+					lines[1] = split[1];
+				} else { //More spaces
+					boolean smaller = true; int x = 1;
+					while (smaller && x < split.length) {
+						String combined = _.buildString(split, " ", 0, x);
+						if (combined.length() > 13) {
+							smaller = false;
+							x--;
+						} else {
+							x++;
+						}
+					}
+					lines[0] = _.buildString(split, " ", 0, x);
+					lines[1] = _.buildString(split, " ", ++x, 9001);
+				}
+			}
+			
 			Sign sign = (Sign) signBlock.getState();
-			sign.setLine(0, ChatColor.AQUA + "--Map--");
-			sign.setLine(1, ChatColor.AQUA + linkedMap.getName());
-			sign.setLine(3, ChatColor.DARK_RED + "[Join]");	
+			sign.setLine(0, ChatColor.DARK_RED + "--Map--");
+			sign.setLine(1, ChatColor.AQUA + lines[0]);
+			sign.setLine(2, ChatColor.AQUA + lines[1]);
+			sign.setLine(3, ChatColor.DARK_RED + "--Join--");	
 			sign.update();
 		}
-		
+				
 		private void clearSign() {
 			Sign sign = (Sign) signBlock.getState();
 			sign.setLine(0, "");

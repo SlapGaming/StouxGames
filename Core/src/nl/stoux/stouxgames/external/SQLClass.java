@@ -2,6 +2,9 @@ package nl.stoux.stouxgames.external;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+
+import nl.stoux.stouxgames.util._;
 
 public abstract class SQLClass {
 
@@ -42,7 +45,26 @@ public abstract class SQLClass {
 		this.keepAlive = keepAlive;
 	}
 	
+	/**
+	 * Make the SQL Class connect with the MySQL Database
+	 * @return succes
+	 */
 	public abstract boolean connect();
+	
+	/**
+	 * Disconnect the SQL Class from the MySQL Database
+	 */
+	public void disconnect() {
+		try {
+			if (con != null) {
+				if (!con.isClosed()) {
+					con.close();
+				}
+			}
+		} catch (SQLException e) {
+			_.log(Level.WARNING, "Failed to disconnect SQL? Exception: " + e.getMessage());
+		}
+	}
 	
 	/**
 	 * Ping the SQL Server. 

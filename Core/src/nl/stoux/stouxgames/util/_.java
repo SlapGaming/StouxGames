@@ -101,6 +101,26 @@ public class _ {
 		plugin.getServer().broadcastMessage(ChatColor.GREEN + "[" + gm + "] " + ChatColor.WHITE + message);
 	}
 	
+	/**
+	 * Build a string from a string array.
+	 * @param split The String array
+	 * @param splitChar The string that should be added between each String from the array
+	 * @param begin The index it should start on
+	 * @param end The index it should end with
+	 * @return The combined string
+	 */
+	public static String buildString(String[] split, String splitChar, int begin, int end) {
+		String combined = "";
+		while (begin <= end && begin < split.length) {
+			if (combined.length() > 0) {
+				combined += splitChar;
+			}
+			combined += split[begin];
+			begin++;
+		}
+		return combined;
+	}
+	
 	/*
 	 ************************
 	 *   Player Utilities   *

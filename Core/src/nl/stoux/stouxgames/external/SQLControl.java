@@ -29,8 +29,9 @@ public class SQLControl {
 	 * Remove a SQL Class from the controller
 	 * @param sqlClass The class
 	 */
-	public void removeSQLClass(SQLClass sqlClass) {
+	public void removeSQLClass(SQLClass sqlClass, boolean disconnect) {
 		sqlClasses.remove(sqlClass);
+		if (disconnect) sqlClass.disconnect();
 	}
 	
 	public void startPinging(int minutes) {

@@ -288,7 +288,7 @@ public class ParkourMap {
 	 * @param dead The player has died
 	 * @param msg Should message the player about death/missed a checkpoint
 	 */
-	protected void teleportPlayerBackToCheckpoint(ParkourPlayer p, boolean dead, boolean msg) {
+	public void teleportPlayerBackToCheckpoint(ParkourPlayer p, boolean dead, boolean msg) {
 		ParkourRun run = p.getRun();
 		Player player = p.getPlayer();
 		if (run.getCurrentCheckpoint() != 0) { //Last checkpoint was NOT start
@@ -331,6 +331,14 @@ public class ParkourMap {
 			return;
 		}
 		
+	}
+	
+	/**
+	 * Teleport a player to the start of the map
+	 * @param p The player
+	 */
+	public void teleportToMapStart(Player p) {
+		p.teleport(startPoint != null ? startPoint : lobby); //L33t ? : format
 	}
 	
 	/*
@@ -386,6 +394,15 @@ public class ParkourMap {
 	 */
 	public boolean hasAllowRestartOnCheckpoint() {
 		return allowRestartOnCheckpoint;
+	}
+	
+	/**
+	 * Get a checkpoint
+	 * @param checkpointNr The checkpoint number
+	 * @return The checkpoint or null
+	 */
+	public Checkpoint getCheckpoint(int checkpointNr) {
+		return checkpointNrMap.get(checkpointNr);
 	}
 	
 	
