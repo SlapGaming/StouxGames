@@ -254,7 +254,7 @@ public class ParkourMap {
 				if (run.isFinished() || !run.hasStarted()) { //If finished or not started -> Start
 					run.reset();
 					run.start();
-					parkour.broadcastToPlayers(p.getName() + " started a new run on " + name + "!");
+					_.msg(p.getPlayer(), GameMode.Parkour, "You've started a new run on " + name + "!");
 				}
 			} else if (region == end) { //Passed finish
 				if (!run.isFinished()) { //Check if finished

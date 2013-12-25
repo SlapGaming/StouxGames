@@ -12,7 +12,7 @@ public class GameController {
 	
 	public GameController() {
 		games = new HashMap<>();
-		timeFormat = new SimpleDateFormat("mm:ss:SS");
+		timeFormat = new SimpleDateFormat("mm:ss:SSS");
 	}
 	
 	/**
