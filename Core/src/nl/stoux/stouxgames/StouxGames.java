@@ -12,10 +12,11 @@ import nl.stoux.stouxgames.games.parkour.Parkour;
 import nl.stoux.stouxgames.games.sonic.Sonic;
 import nl.stoux.stouxgames.games.spleef.Spleef;
 import nl.stoux.stouxgames.games.tntrun.TNTRun;
+import nl.stoux.stouxgames.joinmethod.PortalHandler;
+import nl.stoux.stouxgames.joinmethod.PressurePadHandler;
+import nl.stoux.stouxgames.joinmethod.PressurePadListener;
 import nl.stoux.stouxgames.listener.EventListener;
 import nl.stoux.stouxgames.player.PlayerController;
-import nl.stoux.stouxgames.pressurepads.PressurePadHandler;
-import nl.stoux.stouxgames.pressurepads.PressurePadListener;
 import nl.stoux.stouxgames.util._;
 
 import org.bukkit.World;
@@ -48,6 +49,7 @@ public class StouxGames extends JavaPlugin {
 	private PlayerController playerController;
 	private GameController gameController;
 	private PressurePadHandler pressurePadHandler;
+	private PortalHandler portalHandler;
 	
 		
 	
@@ -91,9 +93,12 @@ public class StouxGames extends JavaPlugin {
 		//Initialize the games
 		initializeGames();
 		
-		//Create PressurePlate handler & Register it's listener
+		//Create Joinhandlers
 		pressurePadHandler = new PressurePadHandler(gameController);
 		pm.registerEvents(new PressurePadListener(pressurePadHandler), this);
+		
+		portalHandler = new PortalHandler(gameController);
+		pm.registerEvents(portalHandler, this);		
 		
 		//Register events
 		pm.registerEvents(new EventListener(playerController), this);

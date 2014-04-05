@@ -1,4 +1,4 @@
-package nl.stoux.stouxgames.pressurepads;
+package nl.stoux.stouxgames.joinmethod;
 
 import java.util.HashMap;
 import java.util.logging.Level;

@@ -15,6 +15,9 @@ import org.mcsg.double0negative.tabapi.TabAPI;
  */
 public class GamePlayer {
 
+	//Jointime
+	protected long joinTime;
+	
 	//The player
 	protected Player p;
 	protected String name;
@@ -32,6 +35,7 @@ public class GamePlayer {
 		this.game = game;
 		name = p.getName();
 		state = PlayerState.joining;
+		joinTime = System.currentTimeMillis();
 	}
 	
 	/**
@@ -142,6 +146,14 @@ public class GamePlayer {
 	 */
 	public String getName() {
 		return name;
+	}
+	
+	/**
+	 * Get the time the player joined
+	 * @return the time in millis
+	 */
+	public long getJoinTime() {
+		return joinTime;
 	}
 
 }
