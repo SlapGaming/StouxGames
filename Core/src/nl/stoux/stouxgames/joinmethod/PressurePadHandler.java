@@ -7,6 +7,7 @@ import nl.stoux.stouxgames.games.GameController;
 import nl.stoux.stouxgames.games.GameMode;
 import nl.stoux.stouxgames.storage.YamlStorage;
 import nl.stoux.stouxgames.util._;
+import nl.stoux.stouxgames.util._T;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,6 +18,9 @@ import org.bukkit.util.Vector;
 
 public class PressurePadHandler {
 
+	//Keeps track of the last time someone was boosted on a sparta pad
+	private HashMap<String, Long> boostedTime;
+	
 	//Saved stuff
 	private YamlStorage yaml;
 	private FileConfiguration config;
@@ -34,6 +38,7 @@ public class PressurePadHandler {
 		config = yaml.getConfig();
 		pads = new HashMap<>();
 		spartas = new HashMap<>();
+		boostedTime = new HashMap<>();
 		checkPads();
 	}
 	
@@ -53,7 +58,7 @@ public class PressurePadHandler {
 	 * @param p The player
 	 * @param loc The pad location
 	 */
-	public void handlePadPressed(Player p, Location loc) {
+	public void handlePadPressed(final Player p, Location loc) {
 		if (!pads.containsKey(loc)) { //Check if the pad is known
 			return;
 		}
@@ -96,9 +101,20 @@ public class PressurePadHandler {
 	    
 		//Sparta pads
 		case SpartaCD: case SpartaHungerGames: case SpartaParkour: case SpartaSonic: case SpartaSpleef: case SpartaTNTRun: case ChristmasSparta:
-			Vector v = spartas.get(type);
+			final Vector v = spartas.get(type);
 			if (v != null) {
-				p.setVelocity(v);
+				if (boostedTime.containsKey(p.getName())) { //Already got boosted earlier
+					if (System.currentTimeMillis() - boostedTime.get(p.getName()) < 500) { //If less than half a second ago
+						return; //cancel
+					}
+				}
+				boostedTime.put(p.getName(), System.currentTimeMillis());
+				_T.runLater_Sync(new Runnable() { 
+					@Override
+					public void run() {
+						p.setVelocity(v);
+					}
+				}, 1);
 			}
 			break;
 		default:
