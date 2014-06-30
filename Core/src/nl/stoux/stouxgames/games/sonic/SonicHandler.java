@@ -11,27 +11,24 @@ import nl.stoux.stouxgames.games.DefaultEventHandler;
 import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.util._T;
 
-public class SonicHandler extends DefaultEventHandler {
+public class SonicHandler extends DefaultEventHandler<Sonic, SonicPlayer> {
 
-	private Sonic sonic;
-	
 	public SonicHandler(Sonic sonic) {
 		super(sonic);
-		this.sonic = sonic;
 	}
 	
 	@Override
-	public void onPlayerMove(GamePlayer gP, PlayerMoveEvent event) {
-		sonic.onPlayerMove(gP, event);
+	public void onPlayerMove(SonicPlayer gP, PlayerMoveEvent event) {
+		game.onPlayerMove(gP, event);
 	}
 	
 	@Override
-	public void onPlayerInteract(GamePlayer gP, PlayerInteractEvent event) {
-		sonic.onPlayerInteract(gP, event);
+	public void onPlayerInteract(SonicPlayer gP, PlayerInteractEvent event) {
+        game.onPlayerInteract(gP, event);
 	}
 
 	@Override
-	public void onPlayerDamage(GamePlayer gP, EntityDamageEvent event) {
+	public void onPlayerDamage(SonicPlayer gP, EntityDamageEvent event) {
 		final Player p = gP.getPlayer();
 		_T.runLater_Sync(new Runnable() {
 			

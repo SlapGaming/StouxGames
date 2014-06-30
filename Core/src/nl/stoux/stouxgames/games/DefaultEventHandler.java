@@ -16,12 +16,12 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.util._;
 
-public class DefaultEventHandler {
+public class DefaultEventHandler<T extends AbstractGame, T2 extends GamePlayer> {
 	
 	//The abstract game
-	private AbstractGame game;
+	protected T game;
 	
-	public DefaultEventHandler(AbstractGame game) {
+	public DefaultEventHandler(T game) {
 		this.game = game;
 	}
 
@@ -30,7 +30,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onQuit(GamePlayer gP, PlayerQuitEvent event) {
+	public void onQuit(T2 gP, PlayerQuitEvent event) {
 		game.playerQuit(gP);
 	}
 	
@@ -39,7 +39,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onPlayerInteract(GamePlayer gP, PlayerInteractEvent event) {
+	public void onPlayerInteract(T2 gP, PlayerInteractEvent event) {
 		return;
 	}
 	
@@ -48,7 +48,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onPlayerMove(GamePlayer gP, PlayerMoveEvent event) {
+	public void onPlayerMove(T2 gP, PlayerMoveEvent event) {
 		return;
 	}
 	
@@ -57,7 +57,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onBlockDamage(GamePlayer gP, BlockDamageEvent event) {
+	public void onBlockDamage(T2 gP, BlockDamageEvent event) {
 		return;
 	}
 	
@@ -66,7 +66,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onFoodLevelChange(GamePlayer gP, FoodLevelChangeEvent event) {
+	public void onFoodLevelChange(T2 gP, FoodLevelChangeEvent event) {
 		event.setCancelled(true);
 	}
 	
@@ -75,7 +75,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onInventoryEvent(GamePlayer gP, InventoryOpenEvent event) {
+	public void onInventoryEvent(T2 gP, InventoryOpenEvent event) {
 		//event.setCancelled(true);
 	}
 	
@@ -84,7 +84,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onItemDrop(GamePlayer gP, PlayerDropItemEvent event) {
+	public void onItemDrop(T2 gP, PlayerDropItemEvent event) {
 		event.setCancelled(true);
 	}
 	
@@ -93,7 +93,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onItemPickup(GamePlayer gP, PlayerPickupItemEvent event) {
+	public void onItemPickup(T2 gP, PlayerPickupItemEvent event) {
 		event.setCancelled(true);
 	}
 	
@@ -102,7 +102,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onPlayerDied(GamePlayer gP, PlayerDeathEvent event) {
+	public void onPlayerDied(T2 gP, PlayerDeathEvent event) {
 		gP.getGame().playerQuit(gP);
 		_.badMsg(gP.getPlayer(), "You died o.O?");
 	}
@@ -112,7 +112,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onPlayerDamage(GamePlayer gP, EntityDamageEvent event) {
+	public void onPlayerDamage(T2 gP, EntityDamageEvent event) {
 		return;
 	}
 	
@@ -121,7 +121,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onPlayerRespawn(GamePlayer gP, PlayerRespawnEvent event) {
+	public void onPlayerRespawn(T2 gP, PlayerRespawnEvent event) {
 		event.setRespawnLocation(game.getLobby());
 	}
 	
@@ -130,7 +130,7 @@ public class DefaultEventHandler {
 	 * @param gP The player
 	 * @param event The event
 	 */
-	public void onPlayerSneak(GamePlayer gP, PlayerToggleSneakEvent event) {
+	public void onPlayerSneak(T2 gP, PlayerToggleSneakEvent event) {
 		return;
 	}
 

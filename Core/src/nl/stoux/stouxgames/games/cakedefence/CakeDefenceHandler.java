@@ -15,30 +15,27 @@ import nl.stoux.stouxgames.player.GamePlayer;
 import nl.stoux.stouxgames.player.PlayerState;
 import nl.stoux.stouxgames.util._T;
 
-public class CakeDefenceHandler extends DefaultEventHandler {
+public class CakeDefenceHandler extends DefaultEventHandler<CakeDefence, GamePlayer> {
 
-	private CakeDefence cd;
-	
 	public CakeDefenceHandler(CakeDefence game) {
 		super(game);
-		this.cd = game;
 	}
 	
 	@Override
 	public void onPlayerDied(GamePlayer gP, PlayerDeathEvent event) {
-		cd.onPlayerDies(gP, event);
+		game.onPlayerDies(gP, event);
 	}
 	
 	@Override
 	public void onPlayerRespawn(final GamePlayer gP, PlayerRespawnEvent event) {
-		event.setRespawnLocation(cd.getLobby());
-		if (cd.getGameState() == GameState.playing) {
+		event.setRespawnLocation(game.getLobby());
+		if (game.getGameState() == GameState.playing) {
 			_T.runLater_Sync(new BukkitRunnable() {
 				
 				@Override
 				public void run() {
-					if (cd.getGameState() == GameState.playing && gP.getState() != PlayerState.playing) {
-						cd.giveSpectateKit(gP);
+					if (game.getGameState() == GameState.playing && gP.getState() != PlayerState.playing) {
+                        game.giveSpectateKit(gP);
 					}
 				}
 			},1);
@@ -68,7 +65,7 @@ public class CakeDefenceHandler extends DefaultEventHandler {
 	
 	@Override
 	public void onPlayerMove(GamePlayer gP, PlayerMoveEvent event) {
-		cd.onPlayerMove(gP, event);
+        game.onPlayerMove(gP, event);
 	}
 
 }

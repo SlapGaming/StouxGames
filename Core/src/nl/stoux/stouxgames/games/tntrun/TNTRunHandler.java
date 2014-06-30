@@ -5,18 +5,15 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import nl.stoux.stouxgames.games.DefaultEventHandler;
 import nl.stoux.stouxgames.player.GamePlayer;
 
-public class TNTRunHandler extends DefaultEventHandler {
+public class TNTRunHandler extends DefaultEventHandler<TNTRun, GamePlayer> {
 
-	private TNTRun tntRun;
-	
 	public TNTRunHandler(TNTRun tntRun) {
 		super(tntRun);
-		this.tntRun = tntRun;
 	}
 	
 	@Override
 	public void onPlayerMove(GamePlayer gP, PlayerMoveEvent event) {
-		tntRun.onMove(gP, event);
+		game.onMove(gP, event);
 	}
 
 }
