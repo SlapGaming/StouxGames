@@ -113,6 +113,7 @@ public class DefaultEventHandler<T extends AbstractGame, T2 extends GamePlayer> 
 	 * @param event The event
 	 */
 	public void onPlayerDamage(T2 gP, EntityDamageEvent event) {
+        event.setCancelled(true);
 		return;
 	}
 	
@@ -133,5 +134,7 @@ public class DefaultEventHandler<T extends AbstractGame, T2 extends GamePlayer> 
 	public void onPlayerSneak(T2 gP, PlayerToggleSneakEvent event) {
 		return;
 	}
+
+
 
 }

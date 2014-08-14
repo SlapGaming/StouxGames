@@ -76,6 +76,7 @@ public class GamePlayer {
 		//Set player stats
 		p.setGameMode(GameMode.SURVIVAL);
 		p.setFlying(false);
+        p.setAllowFlight(false);
 	}
 	
 	/**
@@ -110,7 +111,7 @@ public class GamePlayer {
 	
 	/**
 	 * Set the players tag
-	 * @param tag the new tag
+	 * @param newTag the new tag
 	 */
 	public void setTag(String newTag) {
 		this.tag = newTag;

@@ -551,8 +551,6 @@ public class TNTRun extends AbstractGame {
 		gP.playerQuitGame();
 		switch(state) {
 		case starting:
-			startCountdown.cancel();
-			//DO NOT BREAK 
 		case playing: //Player gets removed from the game
 			players.remove(gP.getName());
 			broadcastToPlayers(gP.getName() + " has left the game!");

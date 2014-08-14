@@ -279,6 +279,14 @@ public class _ {
 	public static int getRandomInt(int max) {
 		return random.nextInt(max);
 	}
+
+    /**
+     * Get a random boolean
+     * @return the boolean
+     */
+    public static boolean getRandomBoolean() {
+        return random.nextBoolean();
+    }
 	
 	
 	/*
