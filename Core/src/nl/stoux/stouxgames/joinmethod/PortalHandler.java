@@ -1,5 +1,7 @@
 package nl.stoux.stouxgames.joinmethod;
 
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import nl.stoux.stouxgames.games.GameController;
 import nl.stoux.stouxgames.games.GameMode;
 import nl.stoux.stouxgames.player.GamePlayer;
@@ -9,9 +11,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
-
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 public class PortalHandler implements Listener {
 	
